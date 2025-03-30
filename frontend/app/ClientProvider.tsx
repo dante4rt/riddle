@@ -19,6 +19,7 @@ interface Particle {
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   const queryClient = new QueryClient();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const currentYear = new Date().getFullYear();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -98,6 +99,12 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
           <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />
           <div className="relative z-10">
             {children}
+            <footer className="sticky bottom-0 z-20 bg-white bg-opacity-90 text-gray-700 text-center py-2 sm:py-3 text-xs sm:text-sm">
+              © {currentYear} with ❤️ by{" "}
+              <a href="https://ramadhvni.com/" target="_blank" rel="noopener noreferrer">
+                Rama.
+              </a>
+            </footer>
             <Toaster richColors position="top-right" />
           </div>
         </RainbowKitProvider>

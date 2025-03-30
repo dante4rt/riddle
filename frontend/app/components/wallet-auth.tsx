@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 export function WalletAuth() {
-  const { address, isConnecting } = useAccount();
+  const { address } = useAccount();
   const { disconnect } = useDisconnect();
   const connections = useConnections();
   const router = useRouter();

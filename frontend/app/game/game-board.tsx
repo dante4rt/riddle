@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
 import Keyboard from "./keyboard";
 import { WalletAuth } from "../components/wallet-auth";
 
@@ -26,7 +28,6 @@ export default function GameBoard() {
   const [guesses, setGuesses] = useState<string[]>([]);
   const [currentGuess, setCurrentGuess] = useState("");
   const [gameOver, setGameOver] = useState(false);
-  const [message, setMessage] = useState("");
 
   const startGame = () => {
     const randomWord = WORDS[Math.floor(Math.random() * WORDS.length)];
@@ -35,15 +36,14 @@ export default function GameBoard() {
     setCurrentGuess("");
     setGameStarted(true);
     setGameOver(false);
-    setMessage("");
   };
 
   const handleKeyPress = (key: string) => {
-    if (gameOver) return;
+    if (gameOver || !gameStarted) return;
 
-    if (key === "ENTER") {
+    if (key === "Enter") {
       if (currentGuess.length !== 5) {
-        setMessage("Word must be 5 letters");
+        toast.error("Word must be 5 letters");
         return;
       }
 
@@ -53,19 +53,33 @@ export default function GameBoard() {
 
       if (currentGuess === targetWord) {
         setGameOver(true);
-        setMessage("You won! 🎉");
+        toast.success("You won! 🎉", { duration: 5000 });
       } else if (newGuesses.length >= 6) {
         setGameOver(true);
-        setMessage(`Game over! The word was ${targetWord}`);
+        toast.error(`Game over! The word was ${targetWord}`, { duration: 5000 });
       }
-    } else if (key === "BACKSPACE") {
+    } else if (key === "Backspace") {
       setCurrentGuess(currentGuess.slice(0, -1));
-    } else if (currentGuess.length < 5 && /^[A-Z]$/.test(key)) {
-      setCurrentGuess(currentGuess + key);
+    } else if (currentGuess.length < 5 && /^[A-Z]$/.test(key.toUpperCase())) {
+      setCurrentGuess(currentGuess + key.toUpperCase());
     }
   };
 
-  const getLetterStatus = (letter: string, index: number, _: string) => {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const key = event.key;
+      if (key === "Enter" || key === "Backspace" || /^[a-zA-Z]$/.test(key)) {
+        handleKeyPress(key);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [gameOver, gameStarted, currentGuess, guesses, targetWord]);
+
+  const getLetterStatus = (letter: string, index: number) => {
     if (targetWord[index] === letter) {
       return "correct";
     } else if (targetWord.includes(letter)) {
@@ -76,32 +90,57 @@ export default function GameBoard() {
   };
 
   return (
-    <>
+    <div className="flex flex-col items-center w-full min-h-screen px-4 py-6 sm:px-6 md:px-8">
       {!gameStarted && (
-        <h1 className="text-3xl md:text-4xl font-extrabold text-center text-purple-400 mb-6 md:mb-8 drop-shadow-lg tracking-wide animated-title">
-          Ready to Riddle? Your Web3 Wordle Adventure Awaits!
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-center text-purple-400 mb-4 sm:mb-6 md:mb-8 drop-shadow-lg tracking-wide animated-title pt-12 md:pt-16 lg:pt-24">
+          Ready to Riddle? Your Web3 Wordle Awaits!
         </h1>
       )}
 
-      <div className="flex flex-col items-center w-full px-4 md:px-0 max-w-md">
+      <div className="flex flex-col items-center w-full max-w-md space-y-4 sm:space-y-6">
         {isConnected ? (
           <>
             {!gameStarted ? (
-              <div className="text-center p-4 md:p-6 bg-purple-50 rounded-lg shadow-md">
-                <p className="text-lg md:text-xl text-gray-700 font-medium">
-                  Dive into Web3 Wordle – a blockchain twist on the classic game.
-                </p>
-                <WalletAuth />
-                <Button
-                  onClick={startGame}
-                  className="bg-green-200 hover:bg-green-300 text-gray-800 font-bold py-2 px-6 md:px-8 rounded-full shadow-md hover:shadow-lg transition-all duration-200 mt-4 md:mt-6 cursor-pointer"
-                >
-                  Start Game
-                </Button>
-              </div>
+              <Card className="w-full bg-purple-50 shadow-md">
+                <CardHeader>
+                  <CardTitle className="text-lg sm:text-xl md:text-2xl text-gray-700 font-medium text-center">
+                    Web3 Wordle – Blockchain Edition
+                  </CardTitle>
+                  <WalletAuth />
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="bg-white p-3 rounded-md shadow-inner">
+                    <p className="text-sm sm:text-base text-gray-800 font-semibold mb-2">
+                      How to Play 👇
+                    </p>
+                    <ul className="text-xs sm:text-sm text-gray-600 list-inside space-y-1 list-none">
+                      <li>
+                        <span className="inline-block w-2 h-2 sm:w-3 sm:h-3 bg-green-200 rounded mr-1"></span>
+                        Green: Right letter, right spot
+                      </li>
+                      <li>
+                        <span className="inline-block w-2 h-2 sm:w-3 sm:h-3 bg-yellow-200 rounded mr-1"></span>
+                        Yellow: Right letter, wrong spot
+                      </li>
+                      <li>
+                        <span className="inline-block w-2 h-2 sm:w-3 sm:h-3 bg-gray-300 rounded mr-1"></span>
+                        Gray: Letter not in word
+                      </li>
+                      <li>Goal: Guess the 5-letter word in 6 tries</li>
+                      <li>Lose: 6 wrong guesses – find it fast!</li>
+                    </ul>
+                  </div>
+                  <Button
+                    onClick={startGame}
+                    className="w-full bg-green-200 hover:bg-green-300 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200"
+                  >
+                    Start Game
+                  </Button>
+                </CardContent>
+              </Card>
             ) : (
               <>
-                <div className="grid grid-rows-6 gap-1 mb-4 w-full max-w-[20rem] sm:max-w-[24rem]">
+                <div className="grid grid-rows-6 gap-1 mb-4 w-full max-w-[16rem] sm:max-w-[20rem] md:max-w-[24rem]">
                   {Array(6)
                     .fill(0)
                     .map((_, rowIndex) => (
@@ -118,20 +157,16 @@ export default function GameBoard() {
 
                             let bgColor = "bg-gray-100";
                             if (guessedLetter) {
-                              const status = getLetterStatus(
-                                guessedLetter,
-                                colIndex,
-                                guesses[rowIndex]
-                              );
+                              const status = getLetterStatus(guessedLetter, colIndex);
                               if (status === "correct") bgColor = "bg-green-200";
-                              else if (status === "present") bgColor = "bg-purple-200";
+                              else if (status === "present") bgColor = "bg-yellow-200";
                               else bgColor = "bg-gray-300";
                             }
 
                             return (
                               <div
                                 key={colIndex}
-                                className={`${bgColor} w-full aspect-square flex items-center justify-center text-lg md:text-xl font-bold rounded border-2 border-gray-200 hover:scale-105 transition-transform`}
+                                className={`${bgColor} w-full aspect-square flex items-center justify-center text-base sm:text-lg md:text-xl font-bold rounded border-2 border-gray-200 hover:scale-105 transition-transform`}
                               >
                                 {letter}
                               </div>
@@ -141,41 +176,40 @@ export default function GameBoard() {
                     ))}
                 </div>
 
-                {message && (
-                  <div className="mb-4 text-center font-medium text-purple-500 text-sm md:text-base">
-                    🎉 {message}
-                  </div>
-                )}
-
                 <Keyboard onKeyPress={handleKeyPress} guesses={guesses} targetWord={targetWord} />
 
-                {gameOver && (
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-4 w-full">
+                  {gameOver && (
+                    <Button
+                      onClick={startGame}
+                      className="w-full bg-green-200 hover:bg-green-300 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200"
+                    >
+                      Play Again
+                    </Button>
+                  )}
                   <Button
-                    onClick={startGame}
-                    className="bg-green-200 hover:bg-green-300 text-gray-800 font-bold py-2 px-6 md:px-8 rounded-full shadow-md hover:shadow-lg transition-all duration-200 mt-4"
+                    onClick={() => setGameStarted(false)}
+                    className="w-full bg-blue-200 hover:bg-blue-300 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200"
                   >
-                    Play Again
+                    Back
                   </Button>
-                )}
-
-                <Button
-                  onClick={() => setGameStarted(false)}
-                  className="bg-blue-200 hover:bg-blue-300 text-gray-800 font-bold py-2 px-6 md:px-8 rounded-full shadow-md hover:shadow-lg transition-all duration-200 mt-4 cursor-pointer"
-                >
-                  Back
-                </Button>
+                </div>
               </>
             )}
           </>
         ) : (
-          <div className="text-center p-4 md:p-6 bg-purple-50 rounded-lg shadow-md">
-            <p className="text-lg md:text-xl text-gray-700 font-medium">
-              Connect your wallet on the homepage to play!
-            </p>
-            <p className="text-sm md:text-base text-gray-500">Redirecting to authenticate...</p>
-          </div>
+          <Card className="w-full bg-purple-50 shadow-md">
+            <CardContent className="pt-6 text-center">
+              <p className="text-lg sm:text-xl text-gray-700 font-medium">
+                Connect your wallet on the homepage to play!
+              </p>
+              <p className="text-sm sm:text-base text-gray-500 mt-2">
+                Redirecting to authenticate...
+              </p>
+            </CardContent>
+          </Card>
         )}
       </div>
-    </>
+    </div>
   );
 }
