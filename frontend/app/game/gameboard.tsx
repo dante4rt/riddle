@@ -7,6 +7,7 @@ import {
   useWriteContract,
   useReadContract,
   useBlockNumber,
+  useConfig,
 } from "wagmi";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +18,7 @@ import { parseEther } from "viem";
 import Keyboard from "./keyboard";
 import { WalletAuth } from "../../components/wallet-auth";
 import { ABI } from "../constants/ABI";
-import { CONTRACT_ADDRESS } from "../constants/config";
+import { CONTRACT_ADDRESSES } from "../constants/config";
 
 const WORDS = [
   "REACT",
@@ -44,8 +45,20 @@ export default function GameBoard() {
   const [isSpinning, setIsSpinning] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const getContractAddress = () => {
+    const { chains } = useConfig();
+
+    const activeChain = chains?.find((chain) => chain.id in CONTRACT_ADDRESSES);
+
+    return activeChain
+      ? CONTRACT_ADDRESSES[activeChain.id as keyof typeof CONTRACT_ADDRESSES]
+      : undefined;
+  };
+
+  const CONTRACT_ADDRESS = getContractAddress();
+
   const { data: lastClaimBlock, refetch: refetchLastClaim } = useReadContract({
-    address: CONTRACT_ADDRESS,
+    address: CONTRACT_ADDRESS as `0x${string}`,
     abi: ABI,
     functionName: "lastClaimBlock",
     args: [address],
@@ -352,7 +365,7 @@ export default function GameBoard() {
                               className="mt-4 bg-green-200 hover:bg-green-300 cursor-pointer"
                               onClick={() =>
                                 claim({
-                                  address: CONTRACT_ADDRESS,
+                                  address: CONTRACT_ADDRESS as `0x${string}`,
                                   abi: ABI,
                                   functionName: "claimReward",
                                   args: [parseEther(reward.toString())],

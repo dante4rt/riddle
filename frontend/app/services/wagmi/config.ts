@@ -3,17 +3,17 @@ import {
     getDefaultConfig,
 } from '@rainbow-me/rainbowkit';
 import {
-    mainnet,
+    baseSepolia,
     sepolia,
 } from 'wagmi/chains';
 import { http } from 'viem';
 
 export const config = getDefaultConfig({
     appName: 'Riddle',
-    projectId: 'YOUR_PROJECT_ID',
-    chains: [mainnet, sepolia],
+    projectId: process.env.NEXT_PUBLIC_RIDDLE_PROJECT_ID!,
+    chains: [baseSepolia, sepolia],
     transports: {
-        [mainnet.id]: http(),
+        [baseSepolia.id]: http(),
         [sepolia.id]: http()
     },
 });
