@@ -1,13 +1,23 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useAccount } from "wagmi";
+import {
+  useAccount,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+  useReadContract,
+  useBlockNumber,
+} from "wagmi";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { parseEther } from "viem";
 import Keyboard from "./keyboard";
-import { WalletAuth } from "../components/wallet-auth";
+import { WalletAuth } from "../../components/wallet-auth";
+import { ABI } from "../constants/ABI";
+import { CONTRACT_ADDRESS } from "../constants/config";
 
 const WORDS = [
   "REACT",
@@ -23,21 +33,34 @@ const WORDS = [
 ];
 
 export default function GameBoard() {
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
   const [gameStarted, setGameStarted] = useState(false);
   const [targetWord, setTargetWord] = useState("");
   const [guesses, setGuesses] = useState<string[]>([]);
   const [currentGuess, setCurrentGuess] = useState("");
   const [gameOver, setGameOver] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [reward, setReward] = useState(0);
+  const [isSpinning, setIsSpinning] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const { data: lastClaimBlock, refetch: refetchLastClaim } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: ABI,
+    functionName: "lastClaimBlock",
+    args: [address],
+  });
+  const { data: blockNumber } = useBlockNumber({ watch: true });
+
   const startGame = () => {
+    if (!canPlay()) return;
     const randomWord = WORDS[Math.floor(Math.random() * WORDS.length)];
     setTargetWord(randomWord);
     setGuesses([]);
     setCurrentGuess("");
     setGameStarted(true);
     setGameOver(false);
+    setReward(0);
     if (inputRef.current) inputRef.current.focus();
   };
 
@@ -69,6 +92,45 @@ export default function GameBoard() {
     }
   };
 
+  const { writeContract: claim, isPending: isClaiming, data: claimHash } = useWriteContract();
+  const { data: claimReceipt, isLoading: isWaitingForClaim } = useWaitForTransactionReceipt({
+    hash: claimHash,
+  });
+
+  const rewards = Array.from({ length: 10 }, (_, i) => 0.005 + i * 0.0005); // 0.005 to 0.01 ETH
+  const spinWheel = () => {
+    setIsSpinning(true);
+    setTimeout(() => {
+      const randomIndex = Math.floor(Math.random() * 10);
+      const selectedReward = rewards[randomIndex];
+      setReward(selectedReward);
+      setIsSpinning(false);
+    }, 3000);
+  };
+
+  const canPlay = () => {
+    if (!lastClaimBlock || lastClaimBlock === BigInt(0) || !blockNumber) return true;
+    const blocksSinceClaim = Number(blockNumber) - Number(lastClaimBlock);
+    return blocksSinceClaim >= 7200;
+  };
+
+  const getCooldownTime = () => {
+    if (!lastClaimBlock || lastClaimBlock === BigInt(0) || !blockNumber || canPlay()) return null;
+    const blocksRemaining = 7200 - (Number(blockNumber) - Number(lastClaimBlock));
+    const secondsRemaining = blocksRemaining * 12;
+    const hours = Math.floor(secondsRemaining / 3600);
+    const minutes = Math.floor((secondsRemaining % 3600) / 60);
+    return `${hours}h ${minutes}m`;
+  };
+
+  useEffect(() => {
+    if (claimReceipt?.status === "success") {
+      toast.success(`Claimed ${reward} ETH!`);
+      setIsModalOpen(false);
+      refetchLastClaim();
+    }
+  }, [claimReceipt]);
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const key = event.key;
@@ -77,27 +139,18 @@ export default function GameBoard() {
         handleKeyPress(key);
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [gameOver, gameStarted, currentGuess, guesses, targetWord]);
 
   useEffect(() => {
-    if (gameStarted && inputRef.current) {
-      inputRef.current.focus();
-    }
+    if (gameStarted && inputRef.current) inputRef.current.focus();
   }, [gameStarted, currentGuess]);
 
   const getLetterStatus = (letter: string, index: number) => {
-    if (targetWord[index] === letter) {
-      return "correct";
-    } else if (targetWord.includes(letter)) {
-      return "present";
-    } else {
-      return "absent";
-    }
+    if (targetWord[index] === letter) return "correct";
+    if (targetWord.includes(letter)) return "present";
+    return "absent";
   };
 
   return (
@@ -108,9 +161,7 @@ export default function GameBoard() {
         value={currentGuess}
         onChange={(e) => {
           const value = e.target.value.toUpperCase();
-          if (/^[A-Z]*$/.test(value) && value.length <= 5) {
-            setCurrentGuess(value);
-          }
+          if (/^[A-Z]*$/.test(value) && value.length <= 5) setCurrentGuess(value);
         }}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === "Backspace") {
@@ -124,7 +175,7 @@ export default function GameBoard() {
       />
 
       {!gameStarted && (
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-center text-purple-400 mb-4 sm:mb-6 md:mb-8 drop-shadow-lg tracking-wide animated-title">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-center text-purple-400 mb-4 sm:mb-6 md:mb-8 drop-shadow-lg tracking-wide">
           Ready to Riddle? Your Web3 Wordle Awaits!
         </h1>
       )}
@@ -160,12 +211,23 @@ export default function GameBoard() {
                       <li>Lose: 6 wrong guesses – find it fast!</li>
                     </ul>
                   </div>
-                  <Button
-                    onClick={startGame}
-                    className="w-full bg-green-200 hover:bg-green-300 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
-                  >
-                    Start Game
-                  </Button>
+                  {canPlay() ? (
+                    <Button
+                      onClick={startGame}
+                      className="w-full bg-green-200 hover:bg-green-300 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                    >
+                      Start Game
+                    </Button>
+                  ) : (
+                    <div className="text-center">
+                      <Button
+                        disabled
+                        className="w-full bg-gray-300 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md cursor-not-allowed"
+                      >
+                        Can play again in {getCooldownTime()}
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ) : (
@@ -185,15 +247,16 @@ export default function GameBoard() {
                                   ? currentGuess[colIndex]
                                   : "";
                               const letter = guessedLetter || currentLetter;
-
                               let bgColor = "bg-gray-100";
                               if (guessedLetter) {
                                 const status = getLetterStatus(guessedLetter, colIndex);
-                                if (status === "correct") bgColor = "bg-green-200";
-                                else if (status === "present") bgColor = "bg-yellow-200";
-                                else bgColor = "bg-gray-300";
+                                bgColor =
+                                  status === "correct"
+                                    ? "bg-green-200"
+                                    : status === "present"
+                                    ? "bg-yellow-200"
+                                    : "bg-gray-300";
                               }
-
                               return (
                                 <div
                                   key={colIndex}
@@ -245,11 +308,80 @@ export default function GameBoard() {
 
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-4 w-full max-w-[16rem] sm:max-w-[20rem] md:max-w-[24rem] flex-wrap">
                   {gameOver && (
+                    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                      <DialogTrigger asChild>
+                        <Button
+                          className="w-full bg-yellow-200 hover:bg-yellow-300 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                          onClick={() => setIsModalOpen(true)}
+                          disabled={isClaiming || isWaitingForClaim || !canPlay()}
+                        >
+                          {isClaiming || isWaitingForClaim
+                            ? "Loading..."
+                            : !canPlay()
+                            ? "Claimed"
+                            : "Claim Reward"}
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="bg-white">
+                        <h2 className="text-xl text-center">Spin the Wheel!</h2>
+                        <div className="flex flex-col items-center">
+                          <div
+                            className={`w-40 h-40 rounded-full border-8 border-gray-300 flex items-center justify-center text-lg font-bold transition-all duration-3000 ease-out ${
+                              isSpinning ? "animate-spin" : ""
+                            }`}
+                            style={{
+                              background: `conic-gradient(
+                                from 0deg,
+                                #ff9999 0% 10%,
+                                #ffcc99 10% 20%,
+                                #ffff99 20% 30%,
+                                #ccff99 30% 40%,
+                                #99ff99 40% 50%,
+                                #99ffcc 50% 60%,
+                                #99ffff 60% 70%,
+                                #99ccff 70% 80%,
+                                #9999ff 80% 90%,
+                                #cc99ff 90% 100%
+                              )`,
+                            }}
+                          >
+                            {reward ? `${reward} ETH` : "Spin!"}
+                          </div>
+                          {reward ? (
+                            <Button
+                              className="mt-4 bg-green-200 hover:bg-green-300 cursor-pointer"
+                              onClick={() =>
+                                claim({
+                                  address: CONTRACT_ADDRESS,
+                                  abi: ABI,
+                                  functionName: "claimReward",
+                                  args: [parseEther(reward.toString())],
+                                })
+                              }
+                              disabled={isClaiming || isWaitingForClaim}
+                            >
+                              {isClaiming || isWaitingForClaim ? "Claiming..." : "Claim Now"}
+                            </Button>
+                          ) : (
+                            <Button
+                              className="mt-4 bg-green-200 hover:bg-green-300 cursor-pointer"
+                              onClick={spinWheel}
+                              disabled={isSpinning}
+                            >
+                              {isSpinning ? "Spinning..." : "Spin"}
+                            </Button>
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                  {gameOver && (
                     <Button
                       onClick={startGame}
                       className="w-full bg-green-200 hover:bg-green-300 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                      disabled={!canPlay()}
                     >
-                      Play Again
+                      {canPlay() ? "Play Again" : `Play Again in ${getCooldownTime()}`}
                     </Button>
                   )}
                   <Button

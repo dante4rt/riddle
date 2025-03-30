@@ -1,19 +1,19 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useAccount, useConnections, useSignMessage, useVerifyMessage, useDisconnect } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { createHash } from "crypto";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export function WalletAuth() {
   const { address } = useAccount();
   const { disconnect } = useDisconnect();
   const connections = useConnections();
   const router = useRouter();
+  const pathname = usePathname();
   const [nonce] = useState(() => Math.floor(Math.random() * 1000000).toString());
-  const [hasSigned, setHasSigned] = useState(false);
   const [verificationState, setVerificationState] = useState<{
     pending: boolean;
     success: boolean;
@@ -23,6 +23,7 @@ export function WalletAuth() {
     success: false,
     error: null,
   });
+  const hasSignedRef = useRef(false);
 
   const hashedNonce = useMemo(() => createHash("sha256").update(nonce).digest("base64"), [nonce]);
 
@@ -53,24 +54,36 @@ export function WalletAuth() {
       const parsed = JSON.parse(savedVerification);
       if (parsed.address === address && parsed.verified) {
         setVerificationState({ pending: false, success: true, error: null });
+        hasSignedRef.current = true;
+      } else {
+        setVerificationState({ pending: false, success: false, error: null });
+        hasSignedRef.current = false;
+        localStorage.removeItem("walletAuth");
       }
+    } else {
+      setVerificationState({ pending: false, success: false, error: null });
+      hasSignedRef.current = false;
     }
   }, [address]);
 
-  useEffect(() => {
+  const triggerSigning = useCallback(() => {
     if (
       connections.length > 0 &&
-      !hasSigned &&
+      !hasSignedRef.current &&
       !verificationState.success &&
       !signPending &&
-      !signature &&
-      !localStorage.getItem("walletAuth")
+      !signature
     ) {
-      toast("Signing message...");
+      console.log("Triggering sign for address:", address);
+      toast("Please sign the message to verify your wallet...");
       signMessage({ message });
-      setHasSigned(true);
+      hasSignedRef.current = true;
     }
-  }, [connections, hasSigned, signPending, signature, signMessage, message, verificationState]);
+  }, [connections, signPending, signature, signMessage, message, verificationState]);
+
+  useEffect(() => {
+    triggerSigning();
+  }, [triggerSigning]);
 
   useEffect(() => {
     if (signError) {
@@ -81,34 +94,40 @@ export function WalletAuth() {
       );
       if (signError.message.includes("User rejected")) {
         disconnect();
-        setHasSigned(false);
+        hasSignedRef.current = false;
         setVerificationState({ pending: false, success: false, error: null });
+        localStorage.removeItem("walletAuth");
       }
     }
   }, [signError, disconnect]);
 
   useEffect(() => {
-    if (verifyPending && connections.length && !localStorage.getItem("walletAuth")) {
+    if (verifyPending) {
       setVerificationState((prev) => ({ ...prev, pending: true }));
       toast("Verifying message...");
     } else if (verifySuccess) {
       setVerificationState({ pending: false, success: true, error: null });
       localStorage.setItem("walletAuth", JSON.stringify({ address, verified: true }));
       toast.success("Verified successfully.");
-      router.push("/game");
+      if (pathname !== "/game") {
+        router.push("/game");
+      }
     } else if (verifyError) {
       setVerificationState({ pending: false, success: false, error: verifyError });
       toast.error("Verification failed.");
     }
-  }, [verifyPending, verifySuccess, verifyError, address]);
+  }, [verifyPending, verifySuccess, verifyError, address, router, pathname]);
 
   useEffect(() => {
     if (!connections.length) {
-      setHasSigned(false);
+      hasSignedRef.current = false;
       setVerificationState({ pending: false, success: false, error: null });
       localStorage.removeItem("walletAuth");
+      if (pathname !== "/") {
+        router.push("/");
+      }
     }
-  }, [connections]);
+  }, [connections, router, pathname]);
 
   return (
     <div className="px-4">

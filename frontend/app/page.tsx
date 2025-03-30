@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { WalletAuth } from "./components/wallet-auth";
+import { WalletAuth } from "../components/wallet-auth";
 import { useAccount } from "wagmi";
 import { useRouter } from "next/navigation";
 
