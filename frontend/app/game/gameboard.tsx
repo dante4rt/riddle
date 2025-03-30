@@ -91,7 +91,7 @@ export default function GameBoard() {
   };
 
   return (
-    <div className="flex flex-col items-center w-full min-h-screen px-4 py-8 sm:px-6 md:px-8">
+    <div className="flex flex-col items-center w-full min-h-screen px-4 py-10 sm:px-6 md:px-8">
       {!gameStarted && (
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-center text-purple-400 mb-4 sm:mb-6 md:mb-8 drop-shadow-lg tracking-wide animated-title pt-12 md:pt-16 lg:pt-24">
           Ready to Riddle? Your Web3 Wordle Awaits!
@@ -178,12 +178,12 @@ export default function GameBoard() {
                       ))}
                   </div>
 
-                  <div className="absolute -top-1 right-0 -translate-y-full">
+                  <div className="absolute -top-2 right-0 -translate-y-full">
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
-                          className="w-6 h-6 sm:w-8 sm:h-8 p-0 rounded-full text-xs sm:text-sm"
+                          className="w-6 h-6 sm:w-8 sm:h-8 p-0 rounded-full text-xs sm:text-sm cursor-pointer"
                         >
                           ?
                         </Button>
