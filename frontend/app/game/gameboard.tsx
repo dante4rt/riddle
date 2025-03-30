@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import Keyboard from "./keyboard";
 import { WalletAuth } from "../components/wallet-auth";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const WORDS = [
   "REACT",
@@ -90,7 +91,7 @@ export default function GameBoard() {
   };
 
   return (
-    <div className="flex flex-col items-center w-full min-h-screen px-4 py-6 sm:px-6 md:px-8">
+    <div className="flex flex-col items-center w-full min-h-screen px-4 py-8 sm:px-6 md:px-8">
       {!gameStarted && (
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-center text-purple-400 mb-4 sm:mb-6 md:mb-8 drop-shadow-lg tracking-wide animated-title pt-12 md:pt-16 lg:pt-24">
           Ready to Riddle? Your Web3 Wordle Awaits!
@@ -132,7 +133,7 @@ export default function GameBoard() {
                   </div>
                   <Button
                     onClick={startGame}
-                    className="w-full bg-green-200 hover:bg-green-300 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200"
+                    className="w-full bg-green-200 hover:bg-green-300 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
                   >
                     Start Game
                   </Button>
@@ -140,45 +141,79 @@ export default function GameBoard() {
               </Card>
             ) : (
               <>
-                <div className="grid grid-rows-6 gap-1 mb-4 w-full max-w-[16rem] sm:max-w-[20rem] md:max-w-[24rem]">
-                  {Array(6)
-                    .fill(0)
-                    .map((_, rowIndex) => (
-                      <div key={rowIndex} className="grid grid-cols-5 gap-1">
-                        {Array(5)
-                          .fill(0)
-                          .map((_, colIndex) => {
-                            const guessedLetter = guesses[rowIndex]?.[colIndex] || "";
-                            const currentLetter =
-                              rowIndex === guesses.length && colIndex < currentGuess.length
-                                ? currentGuess[colIndex]
-                                : "";
-                            const letter = guessedLetter || currentLetter;
+                <div className="relative w-full max-w-[16rem] sm:max-w-[20rem] md:max-w-[24rem] mb-4">
+                  <div className="grid grid-rows-6 gap-1 w-full">
+                    {Array(6)
+                      .fill(0)
+                      .map((_, rowIndex) => (
+                        <div key={rowIndex} className="grid grid-cols-5 gap-1">
+                          {Array(5)
+                            .fill(0)
+                            .map((_, colIndex) => {
+                              const guessedLetter = guesses[rowIndex]?.[colIndex] || "";
+                              const currentLetter =
+                                rowIndex === guesses.length && colIndex < currentGuess.length
+                                  ? currentGuess[colIndex]
+                                  : "";
+                              const letter = guessedLetter || currentLetter;
 
-                            let bgColor = "bg-gray-100";
-                            if (guessedLetter) {
-                              const status = getLetterStatus(guessedLetter, colIndex);
-                              if (status === "correct") bgColor = "bg-green-200";
-                              else if (status === "present") bgColor = "bg-yellow-200";
-                              else bgColor = "bg-gray-300";
-                            }
+                              let bgColor = "bg-gray-100";
+                              if (guessedLetter) {
+                                const status = getLetterStatus(guessedLetter, colIndex);
+                                if (status === "correct") bgColor = "bg-green-200";
+                                else if (status === "present") bgColor = "bg-yellow-200";
+                                else bgColor = "bg-gray-300";
+                              }
 
-                            return (
-                              <div
-                                key={colIndex}
-                                className={`${bgColor} w-full aspect-square flex items-center justify-center text-base sm:text-lg md:text-xl font-bold rounded border-2 border-gray-200 hover:scale-105 transition-transform`}
-                              >
-                                {letter}
-                              </div>
-                            );
-                          })}
-                      </div>
-                    ))}
+                              return (
+                                <div
+                                  key={colIndex}
+                                  className={`${bgColor} w-full aspect-square flex items-center justify-center text-base sm:text-lg md:text-xl font-bold rounded border-2 border-gray-200 hover:scale-105 transition-transform`}
+                                >
+                                  {letter}
+                                </div>
+                              );
+                            })}
+                        </div>
+                      ))}
+                  </div>
+
+                  <div className="absolute -top-1 right-0 -translate-y-full">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-6 h-6 sm:w-8 sm:h-8 p-0 rounded-full text-xs sm:text-sm"
+                        >
+                          ?
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-64 sm:w-72 p-4 bg-white shadow-lg rounded-md">
+                        <h3 className="text-sm sm:text-base font-semibold text-gray-800 mb-2">
+                          Game Rules
+                        </h3>
+                        <ul className="text-xs sm:text-sm text-gray-600 list-none list-inside space-y-1">
+                          <li>
+                            <span className="inline-block w-2 h-2 sm:w-3 sm:h-3 bg-green-200 rounded mr-1"></span>
+                            Green: Right letter, right spot
+                          </li>
+                          <li>
+                            <span className="inline-block w-2 h-2 sm:w-3 sm:h-3 bg-yellow-200 rounded mr-1"></span>
+                            Yellow: Right letter, wrong spot
+                          </li>
+                          <li>
+                            <span className="inline-block w-2 h-2 sm:w-3 sm:h-3 bg-gray-300 rounded mr-1"></span>
+                            Gray: Letter not in word
+                          </li>
+                          <li>Goal: Guess the 5-letter word in 6 tries</li>
+                          <li>Lose: 6 wrong guesses – find it fast!</li>
+                        </ul>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 </div>
-
                 <Keyboard onKeyPress={handleKeyPress} guesses={guesses} targetWord={targetWord} />
-
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-4 w-full flex-wrap">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-4 w-full max-w-[16rem] sm:max-w-[20rem] md:max-w-[24rem]">
                   {gameOver && (
                     <Button
                       onClick={startGame}
@@ -189,7 +224,7 @@ export default function GameBoard() {
                   )}
                   <Button
                     onClick={() => setGameStarted(false)}
-                    className="w-full bg-blue-200 hover:bg-blue-300 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200"
+                    className="w-full bg-blue-200 hover:bg-blue-300 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
                   >
                     Back
                   </Button>

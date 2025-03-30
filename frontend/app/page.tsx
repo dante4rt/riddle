@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { WalletAuth } from "./components/wallet-auth";
+import { useAccount } from "wagmi";
+import { useRouter } from "next/navigation";
 
 interface Particle {
   x: number;
@@ -14,7 +16,19 @@ interface Particle {
 }
 
 export default function Home() {
+  const { isConnected } = useAccount();
+  const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    const savedVerification = localStorage.getItem("walletAuth");
+    if (isConnected && savedVerification) {
+      const parsed = JSON.parse(savedVerification);
+      if (parsed.verified) {
+        router.push("/game");
+      }
+    }
+  }, [isConnected, router]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
