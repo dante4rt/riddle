@@ -10,7 +10,7 @@ import { http } from 'viem';
 
 export const config = getDefaultConfig({
     appName: 'Riddle',
-    projectId: process.env.NEXT_PUBLIC_RIDDLE_PROJECT_ID!,
+    projectId: "PROJECT_ID",
     chains: [baseSepolia, sepolia],
     transports: {
         [baseSepolia.id]: http(),
