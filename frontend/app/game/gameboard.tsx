@@ -45,17 +45,19 @@ export default function GameBoard() {
   const [isSpinning, setIsSpinning] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const getContractAddress = () => {
-    const { chains } = useConfig();
+  const { chains } = useConfig();
+  const CONTRACT_ADDRESS = (() => {
+    interface Chain {
+      id: number;
+    }
 
-    const activeChain = chains?.find((chain) => chain.id in CONTRACT_ADDRESSES);
-
+    const activeChain: Chain | undefined = chains.find(
+      (chain: Chain): boolean => chain.id in CONTRACT_ADDRESSES
+    );
     return activeChain
       ? CONTRACT_ADDRESSES[activeChain.id as keyof typeof CONTRACT_ADDRESSES]
       : undefined;
-  };
-
-  const CONTRACT_ADDRESS = getContractAddress();
+  })() as `0x${string}` | undefined;
 
   const { data: lastClaimBlock, refetch: refetchLastClaim } = useReadContract({
     address: CONTRACT_ADDRESS as `0x${string}`,
