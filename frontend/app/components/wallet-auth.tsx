@@ -116,8 +116,6 @@ export function WalletAuth() {
         <ConnectButton accountStatus={"avatar"} />
       </div>
 
-      {isConnecting && <p>Connecting wallet...</p>}
-
       {connections.length > 0 && (
         <>
           {signError && (
@@ -126,9 +124,6 @@ export function WalletAuth() {
                 ? "Signature rejected, wallet disconnected"
                 : `Sign Error: ${signError.message}`}
             </p>
-          )}
-          {!signPending && !verificationState.success && (
-            <p className="mt-2 text-gray-500">Please sign the message to continue.</p>
           )}
         </>
       )}

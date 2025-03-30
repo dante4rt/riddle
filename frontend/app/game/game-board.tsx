@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useAccount } from "wagmi";
 import { Button } from "@/components/ui/button";
-import Keyboard from "@/keyboard";
-import { WalletAuth } from "@/wallet-auth";
+import Keyboard from "./keyboard";
+import { WalletAuth } from "../components/wallet-auth";
 
 const WORDS = [
   "REACT",
@@ -83,7 +83,7 @@ export default function GameBoard() {
         </h1>
       )}
 
-      <div className="flex flex-col items-center w-full px-4 md:px-0">
+      <div className="flex flex-col items-center w-full px-4 md:px-0 max-w-md">
         {isConnected ? (
           <>
             {!gameStarted ? (
