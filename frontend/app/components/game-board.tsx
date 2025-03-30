@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useAccount } from "wagmi";
 import { Button } from "@/components/ui/button";
-import Keyboard from "./keyboard";
-import { WalletAuth } from "./wallet-auth";
+import Keyboard from "@/keyboard";
+import { WalletAuth } from "@/wallet-auth";
 
 const WORDS = [
   "REACT",
