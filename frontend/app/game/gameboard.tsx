@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
 import Keyboard from "./keyboard";
+import { WalletAuth } from "../components/wallet-auth";
 
 const WORDS = [
   "REACT",
@@ -100,7 +101,7 @@ export default function GameBoard() {
   };
 
   return (
-    <div className="flex flex-col items-center w-full min-h-screen px-4 py-10 sm:px-6 md:px-8">
+    <div className="flex flex-col items-center w-full py-4 md:py-6 lg:py-0 px-6 md:px-8 lg:px-4">
       <input
         ref={inputRef}
         type="text"
@@ -123,7 +124,7 @@ export default function GameBoard() {
       />
 
       {!gameStarted && (
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-center text-purple-400 mb-4 sm:mb-6 md:mb-8 drop-shadow-lg tracking-wide animated-title pt-12 md:pt-16 lg:pt-24">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-center text-purple-400 mb-4 sm:mb-6 md:mb-8 drop-shadow-lg tracking-wide animated-title">
           Ready to Riddle? Your Web3 Wordle Awaits!
         </h1>
       )}
@@ -137,6 +138,7 @@ export default function GameBoard() {
                   <CardTitle className="text-lg sm:text-xl md:text-2xl text-gray-700 font-medium text-center">
                     Web3 Wordle – Blockchain Edition
                   </CardTitle>
+                  <WalletAuth />
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="bg-white p-3 rounded-md shadow-inner">
@@ -168,7 +170,7 @@ export default function GameBoard() {
               </Card>
             ) : (
               <>
-                <div className="relative w-full max-w-[16rem] sm:max-w-[20rem] md:max-w-[24rem] mb-4">
+                <div className="relative w-full max-w-[16rem] sm:max-w-[20rem] md:max-w-[20rem] mb-4">
                   <div className="grid grid-rows-6 gap-1 w-full">
                     {Array(6)
                       .fill(0)
