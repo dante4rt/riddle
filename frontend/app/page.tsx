@@ -1,103 +1,121 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useRef } from "react";
+import { WalletAuth } from "./components/wallet-auth";
+
+interface Particle {
+  x: number;
+  y: number;
+  radius: number;
+  color: string;
+  dx: number;
+  dy: number;
+  life: number;
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const particles: Particle[] = [];
+    const colors = ["#b19cd9", "#77dd77", "#ffb347", "#aec6cf"];
+
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+
+    const createParticle = (): Particle => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      radius: Math.random() * 4 + 2,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      dx: (Math.random() - 0.5) * 3,
+      dy: (Math.random() - 0.5) * 3,
+      life: Math.random() * 100 + 50,
+    });
+
+    const drawParticle = (particle: Particle) => {
+      ctx.beginPath();
+      ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+      ctx.fillStyle = particle.color;
+      ctx.globalAlpha = particle.life / 150;
+      ctx.fill();
+      ctx.closePath();
+    };
+
+    const updateParticles = () => {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.dx;
+        p.y += p.dy;
+        p.life -= 1;
+
+        if (p.x - p.radius < 0 || p.x + p.radius > canvas.width) p.dx *= -1;
+        if (p.y - p.radius < 0 || p.y + p.radius > canvas.height) p.dy *= -1;
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+
+      if (particles.length < 150 && Math.random() > 0.9) {
+        particles.push(createParticle());
+      }
+    };
+
+    const animateParticles = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(drawParticle);
+      updateParticles();
+      requestAnimationFrame(animateParticles);
+    };
+
+    resizeCanvas();
+    for (let i = 0; i < 50; i++) particles.push(createParticle());
+    animateParticles();
+
+    window.addEventListener("resize", resizeCanvas);
+
+    return () => {
+      window.removeEventListener("resize", resizeCanvas);
+    };
+  }, []);
+
+  useEffect(() => {
+    const title = document.getElementById("welcome-title");
+    if (!title) return;
+
+    let angle = 0;
+    const animateTitle = () => {
+      angle += 0.05;
+      const bounce = Math.sin(angle) * 10;
+      const rotate = Math.sin(angle * 0.5) * 5;
+      title.style.transform = `translateY(${bounce}px) rotate(${rotate}deg)`;
+      requestAnimationFrame(animateTitle);
+    };
+    animateTitle();
+  }, []);
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 md:p-24 relative overflow-hidden">
+      <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />
+      <div className="z-10 max-w-5xl w-full flex flex-col items-center text-center">
+        <h1
+          id="welcome-title"
+          className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 sm:mb-6 drop-shadow-[0_3px_6px_rgba(0,0,0,0.2)] bg-gradient-to-r from-[#cfaeff] via-[#a8d5ff] to-[#ffcbc1] bg-clip-text text-transparent"
+        >
+          Riddle – Web3 Wordle Adventure
+        </h1>
+        <p className="text-base sm:text-lg md:text-xl max-w-xs sm:max-w-md animate-fade-in text-gray-700 font-medium leading-relaxed">
+          Crack the code, unlock the blockchain fun! Connect below to play.
+        </p>
+        <div className="mt-4 sm:mt-6">
+          <WalletAuth />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </div>
+    </main>
   );
 }
