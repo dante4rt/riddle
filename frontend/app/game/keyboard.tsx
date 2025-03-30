@@ -53,7 +53,7 @@ export default function Keyboard({ onKeyPress, guesses, targetWord }: KeyboardPr
                 onClick={() => onKeyPress(key)}
                 className={`px-1 py-3 sm:px-2 sm:py-4 rounded font-medium text-xs sm:text-sm ${
                   isSpecialKey ? "w-12 sm:w-16" : "w-6 sm:w-8"
-                } ${status}`}
+                } ${status} focus:outline-none`}
                 variant="ghost"
               >
                 {key === "BACKSPACE" ? "⌫" : key}
