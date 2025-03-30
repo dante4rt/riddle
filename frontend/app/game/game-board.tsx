@@ -178,7 +178,7 @@ export default function GameBoard() {
 
                 <Keyboard onKeyPress={handleKeyPress} guesses={guesses} targetWord={targetWord} />
 
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-4 w-full">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-4 w-full flex-wrap">
                   {gameOver && (
                     <Button
                       onClick={startGame}
