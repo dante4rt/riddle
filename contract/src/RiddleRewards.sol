@@ -50,6 +50,7 @@ contract RiddleRewards {
         require(rewardPool >= rewardAmount, "Not enough reward pool");
 
         uint256 lastClaimed = lastClaimBlock[msg.sender];
+
         if (lastClaimed != 0) {
             require(block.number >= lastClaimed + claimCooldownBlocks, "Wait for cooldown");
         }
@@ -72,7 +73,9 @@ contract RiddleRewards {
     function emergencyWithdraw() external onlyOwner nonReentrant {
         uint256 balance = address(this).balance;
         rewardPool = 0;
+
         emit Funded(address(0), 0);
+
         (bool success,) = payable(owner).call{value: balance}("");
         require(success, "ETH withdrawal failed");
     }

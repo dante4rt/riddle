@@ -1,19 +1,24 @@
-import { defineConfig } from 'eslint/config';
-import js from '@eslint/js';
-import globals from 'globals';
-import tseslint from 'typescript-eslint';
-import pluginReact from 'eslint-plugin-react';
+import globals from "globals";
+import pluginJs from "@eslint/js";
+import tseslint from "typescript-eslint";
+import pluginReact from "eslint-plugin-react";
 
-export default defineConfig([
+/** @type {import('eslint').Linter.Config[]} */
+export default [
   {
-    files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'],
-    plugins: { js },
-    extends: ['js/recommended'],
+    files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
   },
   {
-    files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'],
-    languageOptions: { globals: globals.browser },
+    ignores: ["node_modules/**", ".react-router/**"],
   },
-  tseslint.configs.recommended,
+  { languageOptions: { globals: globals.browser } },
+  pluginJs.configs.recommended,
+  ...tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,
-]);
+  {
+    rules: {
+      "react/react-in-jsx-scope": 0,
+      "@typescript-eslint/no-unused-vars": 0,
+    },
+  },
+];

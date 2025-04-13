@@ -20,23 +20,11 @@ import { WalletAuth } from "../../components/wallet-auth";
 import { ABI } from "../constants/ABI";
 import { CONTRACT_ADDRESSES } from "../constants/config";
 
-const WORDS = [
-  "REACT",
-  "VITEM",
-  "WAGMI",
-  "BLOCK",
-  "CHAIN",
-  "TOKEN",
-  "SMART",
-  "DAPPS",
-  "NODES",
-  "MINER",
-];
-
 export default function GameBoard() {
   const { isConnected, address } = useAccount();
   const [gameStarted, setGameStarted] = useState(false);
-  const [targetWord, setTargetWord] = useState("");
+  const [guessStatuses, setGuessStatuses] = useState<string[][]>([]);
+  const [wordHash, setWordHash] = useState("");
   const [guesses, setGuesses] = useState<string[]>([]);
   const [currentGuess, setCurrentGuess] = useState("");
   const [gameOver, setGameOver] = useState(false);
@@ -46,6 +34,7 @@ export default function GameBoard() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { chains } = useConfig();
+
   const CONTRACT_ADDRESS = (() => {
     interface Chain {
       id: number;
@@ -54,6 +43,7 @@ export default function GameBoard() {
     const activeChain: Chain | undefined = chains.find(
       (chain: Chain): boolean => chain.id in CONTRACT_ADDRESSES
     );
+
     return activeChain
       ? CONTRACT_ADDRESSES[activeChain.id as keyof typeof CONTRACT_ADDRESSES]
       : undefined;
@@ -65,40 +55,63 @@ export default function GameBoard() {
     functionName: "lastClaimBlock",
     args: [address],
   });
+
   const { data: blockNumber } = useBlockNumber({ watch: true });
 
-  const startGame = () => {
-    if (!canPlay()) return;
-    const randomWord = WORDS[Math.floor(Math.random() * WORDS.length)];
-    setTargetWord(randomWord);
-    setGuesses([]);
-    setCurrentGuess("");
-    setGameStarted(true);
-    setGameOver(false);
-    setReward(0);
-    if (inputRef.current) inputRef.current.focus();
+  const startGame = async () => {
+    if (!canPlay() || !address) return;
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/words/random?user=${address}`);
+      const data = await res.json();
+
+      setWordHash(data.hash);
+      setGuesses([]);
+      setCurrentGuess("");
+      setGameStarted(true);
+      setGameOver(false);
+      setReward(0);
+
+      if (inputRef.current) inputRef.current.focus();
+    } catch (err) {
+      console.error("Failed to start game:", err);
+      toast.error("Error starting game");
+    }
   };
 
-  const handleKeyPress = (key: string) => {
+  const handleKeyPress = async (key: string) => {
     if (gameOver || !gameStarted) return;
 
     const normalizedKey = key.toUpperCase();
     if (normalizedKey === "ENTER") {
-      if (currentGuess.length !== 5) {
-        toast.error("Word must be 5 letters");
-        return;
-      }
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/words/check`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user: address,
+            guess: currentGuess,
+          }),
+        });
 
-      const newGuesses = [...guesses, currentGuess];
-      setGuesses(newGuesses);
-      setCurrentGuess("");
+        const { correct, status } = await res.json();
 
-      if (currentGuess === targetWord) {
-        setGameOver(true);
-        toast.success("You won! 🎉", { duration: 5000 });
-      } else if (newGuesses.length >= 6) {
-        setGameOver(true);
-        toast.error(`Game over! The word was ${targetWord}`, { duration: 5000 });
+        const newGuesses = [...guesses, currentGuess];
+
+        setGuesses(newGuesses);
+        setGuessStatuses([...guessStatuses, status]);
+        setCurrentGuess("");
+
+        if (correct) {
+          setGameOver(true);
+          toast.success("You won! 🎉", { duration: 5000 });
+        } else if (newGuesses.length >= 6) {
+          setGameOver(true);
+          toast.error("Game over!", { duration: 5000 });
+        }
+      } catch (err) {
+        console.error("Guess check failed:", err);
+        toast.error("Error checking guess");
       }
     } else if (normalizedKey === "BACKSPACE") {
       setCurrentGuess(currentGuess.slice(0, -1));
@@ -115,9 +128,11 @@ export default function GameBoard() {
   const rewards = Array.from({ length: 10 }, (_, i) => 0.005 + i * 0.0005); // 0.005 to 0.01 ETH
   const spinWheel = () => {
     setIsSpinning(true);
+
     setTimeout(() => {
       const randomIndex = Math.floor(Math.random() * 10);
       const selectedReward = rewards[randomIndex];
+
       setReward(selectedReward);
       setIsSpinning(false);
     }, 3000);
@@ -125,22 +140,27 @@ export default function GameBoard() {
 
   const canPlay = () => {
     if (!lastClaimBlock || lastClaimBlock === BigInt(0) || !blockNumber) return true;
+
     const blocksSinceClaim = Number(blockNumber) - Number(lastClaimBlock);
+
     return blocksSinceClaim >= 7200;
   };
 
   const getCooldownTime = () => {
     if (!lastClaimBlock || lastClaimBlock === BigInt(0) || !blockNumber || canPlay()) return null;
+
     const blocksRemaining = 7200 - (Number(blockNumber) - Number(lastClaimBlock));
     const secondsRemaining = blocksRemaining * 12;
     const hours = Math.floor(secondsRemaining / 3600);
     const minutes = Math.floor((secondsRemaining % 3600) / 60);
+
     return `${hours}h ${minutes}m`;
   };
 
   useEffect(() => {
     if (claimReceipt?.status === "success") {
       toast.success(`Claimed ${reward} ETH!`);
+
       setIsModalOpen(false);
       refetchLastClaim();
     }
@@ -149,23 +169,24 @@ export default function GameBoard() {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const key = event.key;
+
       if (key === "Enter" || key === "Backspace" || /^[a-zA-Z]$/.test(key)) {
         event.preventDefault();
         handleKeyPress(key);
       }
     };
+
     window.addEventListener("keydown", handleKeyDown);
+
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [gameOver, gameStarted, currentGuess, guesses, targetWord]);
+  }, [gameOver, gameStarted, currentGuess, guesses, wordHash]);
 
   useEffect(() => {
     if (gameStarted && inputRef.current) inputRef.current.focus();
   }, [gameStarted, currentGuess]);
 
-  const getLetterStatus = (letter: string, index: number) => {
-    if (targetWord[index] === letter) return "correct";
-    if (targetWord.includes(letter)) return "present";
-    return "absent";
+  const getLetterStatus = (rowIndex: number, colIndex: number) => {
+    return guessStatuses[rowIndex]?.[colIndex] || "default";
   };
 
   return (
@@ -177,12 +198,6 @@ export default function GameBoard() {
         onChange={(e) => {
           const value = e.target.value.toUpperCase();
           if (/^[A-Z]*$/.test(value) && value.length <= 5) setCurrentGuess(value);
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === "Backspace") {
-            e.preventDefault();
-            handleKeyPress(e.key);
-          }
         }}
         className="absolute opacity-0 pointer-events-none"
         autoCapitalize="characters"
@@ -264,13 +279,17 @@ export default function GameBoard() {
                               const letter = guessedLetter || currentLetter;
                               let bgColor = "bg-gray-100";
                               if (guessedLetter) {
-                                const status = getLetterStatus(guessedLetter, colIndex);
-                                bgColor =
-                                  status === "correct"
-                                    ? "bg-green-200"
-                                    : status === "present"
-                                    ? "bg-yellow-200"
-                                    : "bg-gray-300";
+                                const status = getLetterStatus(rowIndex, colIndex);
+                                if (guessedLetter) {
+                                  bgColor =
+                                    status === "correct"
+                                      ? "bg-green-200"
+                                      : status === "present"
+                                      ? "bg-yellow-200"
+                                      : status === "absent"
+                                      ? "bg-gray-300"
+                                      : "bg-gray-100";
+                                }
                               }
                               return (
                                 <div
@@ -319,7 +338,7 @@ export default function GameBoard() {
                   </div>
                 </div>
 
-                <Keyboard onKeyPress={handleKeyPress} guesses={guesses} targetWord={targetWord} />
+                <Keyboard onKeyPress={handleKeyPress} guesses={guesses} targetWord={wordHash} />
 
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-4 w-full max-w-[16rem] sm:max-w-[20rem] md:max-w-[24rem] flex-wrap">
                   {gameOver && (
@@ -389,15 +408,6 @@ export default function GameBoard() {
                         </div>
                       </DialogContent>
                     </Dialog>
-                  )}
-                  {gameOver && (
-                    <Button
-                      onClick={startGame}
-                      className="w-full bg-green-200 hover:bg-green-300 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
-                      disabled={!canPlay()}
-                    >
-                      {canPlay() ? "Play Again" : `Play Again in ${getCooldownTime()}`}
-                    </Button>
                   )}
                   <Button
                     onClick={() => setGameStarted(false)}

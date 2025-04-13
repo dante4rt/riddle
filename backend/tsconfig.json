@@ -1,25 +1,10 @@
 {
   "compilerOptions": {
-    "target": "es2018",
-    "module": "commonjs",
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
+    "target": "ES2020",
+    "module": "CommonJS",
+    "outDir": "dist",
+    "rootDir": "src",
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"],
-  "typeRoots": ["./node_modules/@types", "./src/types"],
-  "sourceMap": true,
-  "sourceRoot": "./src",
-  "esModuleInterop": true,
-  "forceConsistentCasingInFileNames": true,
-  "strict": true,
-  "noImplicitAny": true,
-  "strictNullChecks": true,
-  "allowUnusedLabels": true,
-  "skipLibCheck": true,
-  "resolveJsonModule": true
+    "strict": true
+  }
 }

@@ -47,8 +47,10 @@ contract RiddleRewardsTest is Test {
 
     function test_MarkAsWinner_Success() public {
         vm.prank(owner);
+
         vm.expectEmit(true, false, false, true);
         emit MarkedAsWinner(user1);
+
         riddleRewards.markAsWinner(user1);
 
         assertTrue(riddleRewards.eligibleToClaim(user1), "User1 should be eligible to claim");
@@ -56,6 +58,7 @@ contract RiddleRewardsTest is Test {
 
     function test_MarkAsWinner_NonOwner() public {
         vm.prank(user1);
+
         vm.expectRevert("Only owner");
         riddleRewards.markAsWinner(user1);
 
@@ -85,6 +88,7 @@ contract RiddleRewardsTest is Test {
 
     function test_ClaimReward_NotEligible() public {
         vm.prank(user1);
+
         vm.expectRevert("Not eligible to claim");
         riddleRewards.claimReward(REWARD_AMOUNT);
 
