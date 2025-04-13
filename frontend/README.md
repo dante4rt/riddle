@@ -36,7 +36,6 @@ pnpm dev
 /app              # Main pages and layout
 /components       # UI components like WalletAuth
 /lib              # Utility functions
-/services         # Client-side helpers (e.g. eligibility check)
 /public/images    # OG images & favicon
 ```
 
