@@ -29,6 +29,7 @@ export function WalletAuth() {
 
   const message = useMemo(() => {
     if (!address) return "";
+
     return `I confirm that my address is ${address} with nonce ${hashedNonce}`;
   }, [address, hashedNonce]);
 
@@ -50,8 +51,10 @@ export function WalletAuth() {
 
   useEffect(() => {
     const savedVerification = localStorage.getItem("walletAuth");
+
     if (savedVerification) {
       const parsed = JSON.parse(savedVerification);
+
       if (parsed.address === address && parsed.verified) {
         setVerificationState({ pending: false, success: true, error: null });
         hasSignedRef.current = true;
@@ -75,8 +78,10 @@ export function WalletAuth() {
       !signature
     ) {
       console.log("Triggering sign for address:", address);
+
       toast("Please sign the message to verify your wallet...");
       signMessage({ message });
+
       hasSignedRef.current = true;
     }
   }, [connections, signPending, signature, signMessage, message, verificationState]);
@@ -94,8 +99,10 @@ export function WalletAuth() {
       );
       if (signError.message.includes("User rejected")) {
         disconnect();
+
         hasSignedRef.current = false;
         setVerificationState({ pending: false, success: false, error: null });
+
         localStorage.removeItem("walletAuth");
       }
     }
@@ -104,16 +111,20 @@ export function WalletAuth() {
   useEffect(() => {
     if (verifyPending) {
       setVerificationState((prev) => ({ ...prev, pending: true }));
+
       toast("Verifying message...");
     } else if (verifySuccess) {
       setVerificationState({ pending: false, success: true, error: null });
+
       localStorage.setItem("walletAuth", JSON.stringify({ address, verified: true }));
       toast.success("Verified successfully.");
+
       if (pathname !== "/game") {
         router.push("/game");
       }
     } else if (verifyError) {
       setVerificationState({ pending: false, success: false, error: verifyError });
+
       toast.error("Verification failed.");
     }
   }, [verifyPending, verifySuccess, verifyError, address, router, pathname]);
@@ -121,8 +132,10 @@ export function WalletAuth() {
   useEffect(() => {
     if (!connections.length) {
       hasSignedRef.current = false;
+
       setVerificationState({ pending: false, success: false, error: null });
       localStorage.removeItem("walletAuth");
+
       if (pathname !== "/") {
         router.push("/");
       }
