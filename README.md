@@ -1,26 +1,66 @@
-# Riddle Project
+# 🧩 Riddle Project
 
-## Overview
+A Web3-powered Wordle-style game where players solve riddles and claim crypto rewards. Built with modern technologies across smart contracts, backend APIs, and a dynamic frontend.
 
-This project is built using modern web3 and frontend development stacks. It combines a smart contract backend with a user-friendly frontend interface.
+---
 
-## Tech Stack
+## 📁 Monorepo Structure
 
-- **Next.js**: A React framework for building server-side rendered and static web applications.
-- **RainbowKit**: A library for integrating wallet connection in web3 applications.
-- **Wagmi**: React hooks for Ethereum, enabling seamless interaction with smart contracts.
-- **Foundry**: A blazing fast, portable, and modular toolkit for Ethereum application development.
-- **TypeScript**: A strongly typed programming language that builds on JavaScript, providing better tooling and error checking.
-- **Ethers.js**: A library for interacting with the Ethereum blockchain and its ecosystem.
-- **Tailwind CSS**: A utility-first CSS framework for building modern, responsive designs.
+```text
 
-## Features
+riddle/
+├── frontend/   → Next.js + Wagmi + RainbowKit interface
+├── backend/    → Express + MongoDB API for validation and cooldown tracking
+├── contract/   → Smart contracts written and tested with Foundry
+```
 
-- Smart contract integration using Wagmi.
-- Wallet connection and management via RainbowKit.
-- Frontend built with Next.js for a responsive and dynamic user experience.
-- Smart contract development and testing powered by Foundry.
+---
 
-## License
+## ⚙️ Tech Stack
 
-This project is licensed under the MIT License.
+### Frontend
+
+- **Next.js** – React framework for fast, scalable SSR apps.
+- **TypeScript** – Safer JavaScript with static typing.
+- **Wagmi** – Ethereum React hooks for smart contract interaction.
+- **RainbowKit** – Plug-and-play wallet connection UI.
+- **Tailwind CSS** – Utility-first responsive styling.
+
+### Backend
+
+- **Express.js** – Minimal Node.js framework.
+- **MongoDB** – NoSQL database for tracking player state.
+- **Mongoose** – Elegant MongoDB object modeling.
+- **TypeScript** – Strong typing for API logic.
+
+### Smart Contracts
+
+- **Foundry** – Lightning-fast smart contract development toolkit.
+- **Solidity** – Language of the Ethereum Virtual Machine.
+
+---
+
+## 🚀 Features
+
+- ✅ Smart contract-based reward claiming mechanism.
+- ✅ Wallet verification & riddle solve tracking.
+- ✅ Faucet-like ETH distribution on correct answer.
+- ✅ MongoDB-based cooldown and player state validation.
+- ✅ Fully responsive UI with animated background.
+- ✅ OpenGraph + Twitter SEO metadata.
+
+---
+
+## 🛠 Setup Instructions
+
+Each sub-project (`frontend`, `backend`, `contract`) has its own `README.md` with setup steps. Start from there based on what you’re working on:
+
+```bash
+cd frontend   # or backend / contract
+```
+
+---
+
+## 📜 License
+
+MIT © [Rama (dante4rt)](https://github.com/dante4rt)

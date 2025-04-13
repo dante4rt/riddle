@@ -1,38 +1,75 @@
-# Riddle
+# 🧠 Riddle — Web3 Wordle Game
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+A gamified Wordle-like experience powered by Web3. Connect your wallet, solve the riddle, and claim your crypto reward.
 
-## Getting Started
+Built using [Next.js App Router](https://nextjs.org/docs/app), RainbowKit, Wagmi, and TailwindCSS.
 
-First, run the development server:
+---
+
+## 🚀 Getting Started
+
+Install dependencies and run the dev server:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+> Open [http://localhost:3000](http://localhost:3000) in your browser to play the game locally.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🧩 Tech Stack
 
-## Learn More
+- **Next.js 14 (App Router)** – Server components + SEO
+- **TypeScript** – Strongly typed development
+- **RainbowKit + Wagmi** – Wallet connection and smart contract interaction
+- **Tailwind CSS** – Utility-first styling
+- **Canvas Animation** – Interactive particles background
+- **SEO + OpenGraph** – Optimized social sharing & metadata
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📁 Key Folders
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+/app              # Main pages and layout
+/components       # UI components like WalletAuth
+/lib              # Utility functions
+/services         # Client-side helpers (e.g. eligibility check)
+/public/images    # OG images & favicon
+```
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🌐 Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This app is optimized for deployment on [Vercel](https://vercel.com). You can deploy instantly by clicking below:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/import)
+
+---
+
+## 📝 Notes
+
+- Make sure to update `/app/layout.tsx` and `metadata` for SEO
+- Favicon files are stored in `public/` and automatically linked
+- The riddle eligibility is handled via API from the backend service
+
+---
+
+## 🛠 Useful Commands
+
+```bash
+pnpm dev       # Run dev server
+pnpm build     # Build for production
+pnpm lint      # Lint TypeScript & formatting
+```
+
+---
+
+## 👨‍💻 Author
+
+Made with 💚 by [@dante4rt](https://twitter.com/dntyk)
+
+MIT License

@@ -1,66 +1,107 @@
-## Foundry
+# 🧠 Riddle Contracts
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+Smart contracts powering the Riddle Wordle-like Web3 game. Built and tested using **Foundry**, the modern toolkit for Ethereum development.
 
-Foundry consists of:
+---
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+## ⚙️ Foundry Overview
 
-## Documentation
+[Foundry](https://book.getfoundry.sh/) is a fast, modular Ethereum development framework written in Rust.
 
-https://book.getfoundry.sh/
+Core tools:
 
-## Usage
+- 🔨 **Forge** – Testing framework and project management
+- 🧪 **Cast** – CLI for interacting with contracts and chain data
+- 🧱 **Anvil** – Local Ethereum node for testing
+- 🧰 **Chisel** – Solidity REPL (optional)
 
-### Build
+---
 
-```shell
-$ forge build
+## 📦 Usage
+
+### 🔧 Install Foundry
+
+```bash
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
 ```
 
-### Test
+---
 
-```shell
-$ forge test
+### 🛠 Build
+
+```bash
+forge build
 ```
 
-### Format
+---
 
-```shell
-$ forge fmt
+### ✅ Run Tests
+
+```bash
+forge test
 ```
 
-### Gas Snapshots
+---
 
-```shell
-$ forge snapshot
+### ✨ Format Contracts
+
+```bash
+forge fmt
 ```
 
-### Anvil
+---
 
-```shell
-$ anvil
+### ⛽️ Gas Snapshot
+
+```bash
+forge snapshot
 ```
 
-### Deploy
+---
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+### 🧪 Local Node
+
+Start Anvil for local development:
+
+```bash
+anvil
 ```
 
-### Cast
+---
 
-```shell
-$ cast <subcommand>
+### 🚀 Deploy Script
+
+Update your script and deploy:
+
+```bash
+forge script script/RiddleDeploy.s.sol:RiddleDeployScript \
+  --rpc-url <YOUR_RPC_URL> \
+  --private-key <YOUR_PRIVATE_KEY> \
+  --broadcast
 ```
 
-### Help
+---
 
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
+### 🧙‍♂️ Cast Examples
+
+```bash
+cast call <contract_address> "hasSolved(address)" <user_address>
+cast send <contract_address> "claimReward(uint256)" 1000000000000000000
 ```
+
+---
+
+## 📚 Resources
+
+- 📘 [Foundry Book](https://book.getfoundry.sh/)
+- 🧪 [Forge Docs](https://book.getfoundry.sh/reference/forge/forge)
+- 🔗 [Cast Docs](https://book.getfoundry.sh/reference/cast/cast)
+- 🧱 [Anvil Docs](https://book.getfoundry.sh/reference/anvil/anvil)
+
+---
+
+## 👨‍💻 Author
+
+Created by [@dante4rt](https://twitter.com/dntyk)
+MIT License
