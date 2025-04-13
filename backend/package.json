@@ -4,12 +4,14 @@
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "dev": "ts-node-dev --respawn src/index.ts",
+    "dev": "tsx watch src/index.ts",
     "build": "tsc",
+    "start": "node dist/index.js",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "format": "prettier --write 'src/**/*.{ts,tsx,js,json}'"
   },
   "dependencies": {
+    "@vercel/node": "^5.1.14",
     "axios": "^1.6.0",
     "bcrypt": "^5.1.1",
     "compression": "^1.8.0",
@@ -38,7 +40,9 @@
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-react": "^7.37.5",
     "prettier": "^3.5.3",
+    "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
+    "tsx": "^4.19.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.29.1"
   },
