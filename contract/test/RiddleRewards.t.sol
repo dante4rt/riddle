@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity 0.8.20;
 
 import "forge-std/Test.sol";
@@ -18,6 +17,7 @@ contract RiddleRewardsTest is Test {
     event RewardClaimed(address indexed user, uint256 rewardAmount);
     event Funded(address indexed funder, uint256 amount);
     event CooldownUpdated(uint256 newCooldownBlocks);
+    event MarkedAsWinner(address indexed user);
 
     function setUp() public {
         vm.startPrank(owner);
@@ -45,7 +45,27 @@ contract RiddleRewardsTest is Test {
         assertEq(riddleRewards.rewardPool(), INITIAL_FUND + 0.5 ether, "Reward pool not updated");
     }
 
+    function test_MarkAsWinner_Success() public {
+        vm.prank(owner);
+        vm.expectEmit(true, false, false, true);
+        emit MarkedAsWinner(user1);
+        riddleRewards.markAsWinner(user1);
+
+        assertTrue(riddleRewards.eligibleToClaim(user1), "User1 should be eligible to claim");
+    }
+
+    function test_MarkAsWinner_NonOwner() public {
+        vm.prank(user1);
+        vm.expectRevert("Only owner");
+        riddleRewards.markAsWinner(user1);
+
+        assertFalse(riddleRewards.eligibleToClaim(user1), "User1 should not be eligible to claim");
+    }
+
     function test_ClaimReward_Success() public {
+        vm.prank(owner);
+        riddleRewards.markAsWinner(user1);
+
         vm.deal(user1, 1 ether);
         vm.startPrank(user1);
 
@@ -57,41 +77,34 @@ contract RiddleRewardsTest is Test {
 
         assertEq(riddleRewards.rewardPool(), INITIAL_FUND - REWARD_AMOUNT, "Reward pool not reduced");
         assertEq(riddleRewards.lastClaimBlock(user1), block.number, "Last claim block not updated");
+        assertFalse(riddleRewards.eligibleToClaim(user1), "User1 should no longer be eligible");
         assertEq(user1.balance, 1 ether + REWARD_AMOUNT, "User1 balance not updated");
 
         vm.stopPrank();
     }
 
-    function test_ClaimReward_Cooldown() public {
-        vm.deal(user1, 1 ether);
-        vm.startPrank(user1);
-
+    function test_ClaimReward_NotEligible() public {
+        vm.prank(user1);
+        vm.expectRevert("Not eligible to claim");
         riddleRewards.claimReward(REWARD_AMOUNT);
 
-        vm.expectRevert("You can only claim once every 24 hours (approx)");
-        riddleRewards.claimReward(REWARD_AMOUNT);
-
-        vm.roll(block.number + COOLDOWN_BLOCKS + 1);
-
-        vm.expectEmit(true, false, false, true);
-        emit RewardClaimed(user1, REWARD_AMOUNT);
-        riddleRewards.claimReward(REWARD_AMOUNT);
-
-        assertEq(
-            riddleRewards.rewardPool(), INITIAL_FUND - 2 * REWARD_AMOUNT, "Reward pool not reduced after second claim"
-        );
-        assertEq(user1.balance, 1 ether + 2 * REWARD_AMOUNT, "User1 balance not updated after second claim");
-
-        vm.stopPrank();
+        assertEq(riddleRewards.rewardPool(), INITIAL_FUND, "Reward pool should not change");
+        assertEq(user1.balance, 0, "User1 balance should not change");
     }
 
     function test_ClaimReward_InsufficientFunds() public {
+        vm.prank(owner);
+        riddleRewards.markAsWinner(user1);
+
         vm.prank(user1);
-        vm.expectRevert("Insufficient reward pool");
+        vm.expectRevert("Not enough reward pool");
         riddleRewards.claimReward(INITIAL_FUND + 1 ether);
     }
 
     function test_ClaimReward_InvalidAmount() public {
+        vm.prank(owner);
+        riddleRewards.markAsWinner(user1);
+
         vm.prank(user1);
         vm.expectRevert("Invalid reward amount");
         riddleRewards.claimReward(0);
@@ -110,7 +123,7 @@ contract RiddleRewardsTest is Test {
         vm.stopPrank();
 
         vm.prank(user1);
-        vm.expectRevert("Only owner can perform this action");
+        vm.expectRevert("Only owner");
         riddleRewards.updateClaimCooldown(1000);
     }
 
@@ -128,7 +141,7 @@ contract RiddleRewardsTest is Test {
         vm.stopPrank();
 
         vm.prank(user1);
-        vm.expectRevert("Only owner can perform this action");
+        vm.expectRevert("Only owner");
         riddleRewards.emergencyWithdraw();
     }
 
@@ -144,7 +157,7 @@ contract RiddleRewardsTest is Test {
         assertEq(riddleRewards.rewardPool(), INITIAL_FUND + 0.2 ether, "Reward pool not updated via receive");
     }
 
-    function test_OwnerImmutable() public {
+    function test_OwnerImmutable() public view {
         assertEq(riddleRewards.owner(), owner, "Owner not set correctly");
     }
 }
