@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback, useRef } from "react";
-import { useAccount, useConnections, useSignMessage, useVerifyMessage, useDisconnect } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { createHash } from "crypto";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { useRouter, usePathname } from "next/navigation";
+import { useAccount, useConnections, useDisconnect, useSignMessage, useVerifyMessage } from "wagmi";
 
 export function WalletAuth() {
   const { address } = useAccount();
@@ -111,8 +111,6 @@ export function WalletAuth() {
   useEffect(() => {
     if (verifyPending) {
       setVerificationState((prev) => ({ ...prev, pending: true }));
-
-      toast("Verifying message...");
     } else if (verifySuccess) {
       setVerificationState({ pending: false, success: true, error: null });
 

@@ -1,10 +1,10 @@
 "use client";
 
+import { Toaster } from "@/components/ui/sonner";
+import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { WagmiProvider } from "wagmi";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
-import { Toaster } from "@/components/ui/sonner";
 import { config } from "./services/wagmi/config";
 
 interface Particle {

@@ -1,24 +1,24 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import {
-  useAccount,
-  useWaitForTransactionReceipt,
-  useWriteContract,
-  useReadContract,
-  useBlockNumber,
-  useConfig,
-} from "wagmi";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { parseEther } from "viem";
-import Keyboard from "./keyboard";
+import {
+  useAccount,
+  useBlockNumber,
+  useConfig,
+  useReadContract,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
 import { WalletAuth } from "../../components/wallet-auth";
 import { ABI } from "../constants/ABI";
 import { CONTRACT_ADDRESSES } from "../constants/config";
+import Keyboard from "./keyboard";
 
 export default function GameBoard() {
   const { isConnected, address } = useAccount();
@@ -28,6 +28,7 @@ export default function GameBoard() {
   const [guesses, setGuesses] = useState<string[]>([]);
   const [currentGuess, setCurrentGuess] = useState("");
   const [gameOver, setGameOver] = useState(false);
+  const [gameWon, setGameWon] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reward, setReward] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
@@ -58,6 +59,18 @@ export default function GameBoard() {
 
   const { data: blockNumber } = useBlockNumber({ watch: true });
 
+  const resetGameState = () => {
+    setWordHash("");
+    setGuesses([]);
+    setGuessStatuses([]);
+    setCurrentGuess("");
+    setGameOver(false);
+    setGameWon(false);
+    setReward(0);
+    setIsModalOpen(false);
+    setIsSpinning(false);
+  };
+
   const startGame = async () => {
     if (!canPlay() || !address) return;
 
@@ -65,12 +78,9 @@ export default function GameBoard() {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/words/random?user=${address}`);
       const data = await res.json();
 
+      resetGameState();
       setWordHash(data.hash);
-      setGuesses([]);
-      setCurrentGuess("");
       setGameStarted(true);
-      setGameOver(false);
-      setReward(0);
 
       if (inputRef.current) inputRef.current.focus();
     } catch (err) {
@@ -103,6 +113,7 @@ export default function GameBoard() {
         setCurrentGuess("");
 
         if (correct) {
+          setGameWon(true);
           setGameOver(true);
           toast.success("You won! 🎉", { duration: 5000 });
         } else if (newGuesses.length >= 6) {
@@ -163,6 +174,8 @@ export default function GameBoard() {
 
       setIsModalOpen(false);
       refetchLastClaim();
+      resetGameState();
+      setGameStarted(false);
     }
   }, [claimReceipt]);
 
@@ -341,7 +354,7 @@ export default function GameBoard() {
                 <Keyboard onKeyPress={handleKeyPress} guesses={guesses} targetWord={wordHash} />
 
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-4 w-full max-w-[16rem] sm:max-w-[20rem] md:max-w-[24rem] flex-wrap">
-                  {gameOver && (
+                  {gameWon && (
                     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                       <DialogTrigger asChild>
                         <Button
@@ -410,7 +423,10 @@ export default function GameBoard() {
                     </Dialog>
                   )}
                   <Button
-                    onClick={() => setGameStarted(false)}
+                    onClick={() => {
+                      resetGameState();
+                      setGameStarted(false);
+                    }}
                     className="w-full bg-blue-200 hover:bg-blue-300 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
                   >
                     Back

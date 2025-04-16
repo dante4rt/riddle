@@ -1,12 +1,12 @@
-import '@rainbow-me/rainbowkit/styles.css';
 import {
     getDefaultConfig,
 } from '@rainbow-me/rainbowkit';
+import '@rainbow-me/rainbowkit/styles.css';
+import { http } from 'viem';
 import {
     baseSepolia,
     sepolia,
 } from 'wagmi/chains';
-import { http } from 'viem';
 
 export const config = getDefaultConfig({
     appName: 'Riddle',

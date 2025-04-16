@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { WalletAuth } from "../components/wallet-auth";
-import { useAccount } from "wagmi";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
+import { useAccount } from "wagmi";
+import { WalletAuth } from "../components/wallet-auth";
 
 interface Particle {
   x: number;
