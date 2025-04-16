@@ -11,9 +11,9 @@ import {
 export const config = getDefaultConfig({
     appName: 'Riddle',
     projectId: "PROJECT_ID",
-    chains: [baseSepolia, sepolia],
+    chains: [sepolia, baseSepolia],
     transports: {
+        [sepolia.id]: http(),
         [baseSepolia.id]: http(),
-        [sepolia.id]: http()
     },
 });

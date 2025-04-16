@@ -10,7 +10,7 @@ import { parseEther } from "viem";
 import {
   useAccount,
   useBlockNumber,
-  useConfig,
+  useChainId,
   useReadContract,
   useWaitForTransactionReceipt,
   useWriteContract,
@@ -34,27 +34,19 @@ export default function GameBoard() {
   const [isSpinning, setIsSpinning] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { chains } = useConfig();
+  const chainId = useChainId();
 
-  const CONTRACT_ADDRESS = (() => {
-    interface Chain {
-      id: number;
-    }
-
-    const activeChain: Chain | undefined = chains.find(
-      (chain: Chain): boolean => chain.id in CONTRACT_ADDRESSES
-    );
-
-    return activeChain
-      ? CONTRACT_ADDRESSES[activeChain.id as keyof typeof CONTRACT_ADDRESSES]
+  const CONTRACT_ADDRESS =
+    chainId in CONTRACT_ADDRESSES
+      ? CONTRACT_ADDRESSES[chainId as keyof typeof CONTRACT_ADDRESSES]
       : undefined;
-  })() as `0x${string}` | undefined;
 
   const { data: lastClaimBlock, refetch: refetchLastClaim } = useReadContract({
     address: CONTRACT_ADDRESS as `0x${string}`,
     abi: ABI,
     functionName: "lastClaimBlock",
     args: [address],
+    chainId,
   });
 
   const { data: blockNumber } = useBlockNumber({ watch: true });
@@ -134,6 +126,7 @@ export default function GameBoard() {
   const { writeContract: claim, isPending: isClaiming, data: claimHash } = useWriteContract();
   const { data: claimReceipt, isLoading: isWaitingForClaim } = useWaitForTransactionReceipt({
     hash: claimHash,
+    chainId,
   });
 
   const rewards = Array.from({ length: 10 }, (_, i) => 0.005 + i * 0.0005); // 0.005 to 0.01 ETH
@@ -378,18 +371,18 @@ export default function GameBoard() {
                             }`}
                             style={{
                               background: `conic-gradient(
-                                from 0deg,
-                                #ff9999 0% 10%,
-                                #ffcc99 10% 20%,
-                                #ffff99 20% 30%,
-                                #ccff99 30% 40%,
-                                #99ff99 40% 50%,
-                                #99ffcc 50% 60%,
-                                #99ffff 60% 70%,
-                                #99ccff 70% 80%,
-                                #9999ff 80% 90%,
-                                #cc99ff 90% 100%
-                              )`,
+                from 0deg,
+                #ff9999 0% 10%,
+                #ffcc99 10% 20%,
+                #ffff99 20% 30%,
+                #ccff99 30% 40%,
+                #99ff99 40% 50%,
+                #99ffcc 50% 60%,
+                #99ffff 60% 70%,
+                #99ccff 70% 80%,
+                #9999ff 80% 90%,
+                #cc99ff 90% 100%
+              )`,
                             }}
                           >
                             {reward ? `${reward} ETH` : "Spin!"}
@@ -403,6 +396,7 @@ export default function GameBoard() {
                                   abi: ABI,
                                   functionName: "claimReward",
                                   args: [parseEther(reward.toString())],
+                                  chainId,
                                 })
                               }
                               disabled={isClaiming || isWaitingForClaim}
@@ -421,6 +415,18 @@ export default function GameBoard() {
                         </div>
                       </DialogContent>
                     </Dialog>
+                  )}
+                  {gameOver && (
+                    <Button
+                      onClick={async () => {
+                        resetGameState();
+                        await startGame();
+                      }}
+                      className="w-full bg-purple-200 hover:bg-purple-300 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                      disabled={!canPlay()}
+                    >
+                      {canPlay() ? "Play Again" : `Play Again in ${getCooldownTime()}`}
+                    </Button>
                   )}
                   <Button
                     onClick={() => {
