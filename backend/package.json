@@ -8,7 +8,8 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
-    "format": "prettier --write 'src/**/*.{ts,tsx,js,json}'"
+    "format": "prettier --write 'src/**/*.{ts,tsx,js,json}'",
+    "postbuild": "node src/helpers/add-js-extension.js"
   },
   "dependencies": {
     "@vercel/node": "^5.1.14",
@@ -19,6 +20,7 @@
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
     "helmet": "^8.1.0",
+    "inquirer": "^12.5.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.8.6",
     "viem": "^2.26.3"
