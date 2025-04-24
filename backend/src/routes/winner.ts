@@ -11,9 +11,12 @@ router.post("/", async (req, res) => {
 
   try {
     const txHash = await markWinner(user, chainId);
-    await WinnerLog.create({ user, txHash });
 
-    res.json({ success: true, txHash });
+    if (txHash) {
+      await WinnerLog.create({ user, txHash });
+
+      res.json({ success: true, txHash });
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to mark winner" });

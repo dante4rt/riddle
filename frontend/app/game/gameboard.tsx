@@ -174,16 +174,22 @@ export default function GameBoard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user: address, chainId }),
       });
-      const { success, txHash } = await res.json();
 
-      if (txHash && success) {
-        claim({
-          address: CONTRACT_ADDRESS as `0x${string}`,
-          abi: ABI,
-          functionName: "claimReward",
-          args: [parseEther(reward.toString())],
-          chainId,
-        });
+      if (res.ok) {
+        const { success, txHash } = await res.json();
+
+        if (txHash && success) {
+          claim({
+            address: CONTRACT_ADDRESS as `0x${string}`,
+            abi: ABI,
+            functionName: "claimReward",
+            args: [parseEther(reward.toString())],
+            chainId,
+          });
+        }
+      } else {
+        const { error } = await res.json();
+        toast.error(`Error: ${error}`);
       }
     } catch (error) {
       console.error("Guess claim rewards:", error);
