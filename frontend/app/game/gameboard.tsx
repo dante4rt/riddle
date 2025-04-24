@@ -161,6 +161,36 @@ export default function GameBoard() {
     return `${hours}h ${minutes}m`;
   };
 
+  const getLetterStatus = (rowIndex: number, colIndex: number) => {
+    return guessStatuses[rowIndex]?.[colIndex] || "default";
+  };
+
+  const claimReward = async () => {
+    if (!address || !reward) return;
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/winner`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user: address, chainId }),
+      });
+      const { success, txHash } = await res.json();
+
+      if (txHash && success) {
+        claim({
+          address: CONTRACT_ADDRESS as `0x${string}`,
+          abi: ABI,
+          functionName: "claimReward",
+          args: [parseEther(reward.toString())],
+          chainId,
+        });
+      }
+    } catch (error) {
+      console.error("Guess claim rewards:", error);
+      toast.error("Error claiming rewards");
+    }
+  };
+
   useEffect(() => {
     if (claimReceipt?.status === "success") {
       toast.success(`Claimed ${reward} ETH!`);
@@ -190,10 +220,6 @@ export default function GameBoard() {
   useEffect(() => {
     if (gameStarted && inputRef.current) inputRef.current.focus();
   }, [gameStarted, currentGuess]);
-
-  const getLetterStatus = (rowIndex: number, colIndex: number) => {
-    return guessStatuses[rowIndex]?.[colIndex] || "default";
-  };
 
   return (
     <div className="flex flex-col items-center w-full py-4 md:py-6 lg:py-0 px-6 md:px-8 lg:px-4">
@@ -390,15 +416,7 @@ export default function GameBoard() {
                           {reward ? (
                             <Button
                               className="mt-4 bg-green-200 hover:bg-green-300 cursor-pointer"
-                              onClick={() =>
-                                claim({
-                                  address: CONTRACT_ADDRESS as `0x${string}`,
-                                  abi: ABI,
-                                  functionName: "claimReward",
-                                  args: [parseEther(reward.toString())],
-                                  chainId,
-                                })
-                              }
+                              onClick={claimReward}
                               disabled={isClaiming || isWaitingForClaim}
                             >
                               {isClaiming || isWaitingForClaim ? "Claiming..." : "Claim Now"}
