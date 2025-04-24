@@ -1,6 +1,6 @@
-import { CONTRACT_ADDRESSES } from "src/constants/config";
 import { parseAbi } from "viem";
 import { baseSepolia, sepolia } from "viem/chains";
+import { CONTRACT_ADDRESSES } from "../constants/config";
 import { walletClient } from "../utils/web3";
 
 const ABI = parseAbi(["function markAsWinner(address user) external"]);
