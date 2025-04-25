@@ -1,15 +1,27 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { parseEther } from "viem";
 import {
   useAccount,
+  useBalance,
   useBlockNumber,
   useChainId,
   useReadContract,
+  useSendTransaction,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
@@ -30,20 +42,25 @@ export default function GameBoard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reward, setReward] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
+  const [donationAmount, setDonationAmount] = useState<string>("");
+  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
   const [flippingRow, setFlippingRow] = useState<number | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const chainId = useChainId();
+  const rewards = Array.from({ length: 10 }, (_, i) => 0.005 + i * 0.0005); // 0.005 to 0.01 ETH
+
   const [animationStates, setAnimationStates] = useState<boolean[][]>(
     Array(6)
       .fill(0)
       .map(() => Array(5).fill(false))
   );
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const chainId = useChainId();
 
   const CONTRACT_ADDRESS =
     chainId in CONTRACT_ADDRESSES
       ? CONTRACT_ADDRESSES[chainId as keyof typeof CONTRACT_ADDRESSES]
       : undefined;
+
+  const { data: blockNumber } = useBlockNumber({ watch: true });
 
   const { data: lastClaimBlock, refetch: refetchLastClaim } = useReadContract({
     address: CONTRACT_ADDRESS as `0x${string}`,
@@ -52,8 +69,23 @@ export default function GameBoard() {
     args: [address],
     chainId,
   });
-
-  const { data: blockNumber } = useBlockNumber({ watch: true });
+  const { writeContract: claim, isPending: isClaiming, data: claimHash } = useWriteContract();
+  const { data: claimReceipt, isLoading: isWaitingForClaim } = useWaitForTransactionReceipt({
+    hash: claimHash,
+    chainId,
+  });
+  const {
+    sendTransaction: sendDonation,
+    isPending: isDonating,
+    data: donateHash,
+  } = useSendTransaction();
+  const { data: donateReceipt, isLoading: isWaitingForDonate } = useWaitForTransactionReceipt({
+    hash: donateHash,
+    chainId,
+  });
+  const { data: balance } = useBalance({
+    address,
+  });
 
   const resetGameState = () => {
     setWordHash("");
@@ -154,14 +186,6 @@ export default function GameBoard() {
       setCurrentGuess(currentGuess + normalizedKey);
     }
   };
-
-  const { writeContract: claim, isPending: isClaiming, data: claimHash } = useWriteContract();
-  const { data: claimReceipt, isLoading: isWaitingForClaim } = useWaitForTransactionReceipt({
-    hash: claimHash,
-    chainId,
-  });
-
-  const rewards = Array.from({ length: 10 }, (_, i) => 0.005 + i * 0.0005); // 0.005 to 0.01 ETH
   const spinWheel = () => {
     setIsSpinning(true);
 
@@ -228,6 +252,32 @@ export default function GameBoard() {
       toast.error("Error claiming rewards");
     }
   };
+
+  const handleDonation = () => {
+    if (!address || !CONTRACT_ADDRESS || !donationAmount) return;
+
+    try {
+      const amountInWei = parseEther(donationAmount);
+
+      sendDonation({
+        to: CONTRACT_ADDRESS as `0x${string}`,
+        value: amountInWei,
+      });
+
+      toast.info("Processing donation...");
+      setDonationAmount("");
+    } catch (error) {
+      console.error("Donation failed:", error);
+      toast.error("Failed to process donation");
+    }
+  };
+
+  useEffect(() => {
+    if (donateReceipt?.status === "success") {
+      toast.success("Donation has been sent!");
+      setIsDonationModalOpen(false);
+    }
+  }, [donateReceipt]);
 
   useEffect(() => {
     if (claimReceipt?.status === "success") {
@@ -328,6 +378,77 @@ export default function GameBoard() {
                       </Button>
                     </div>
                   )}
+                  <div>
+                    <Dialog open={isDonationModalOpen} onOpenChange={setIsDonationModalOpen}>
+                      <DialogTrigger asChild>
+                        <Button className="w-full bg-blue-100 hover:bg-blue-200 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer">
+                          Support With Donation
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="bg-white fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%]">
+                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-20 w-24 h-24 z-10">
+                          <DotLottieReact
+                            src="dance.lottie"
+                            loop
+                            autoplay
+                            className="w-full h-full object-contain cursor-pointer"
+                          />
+                        </div>
+                        <DialogHeader>
+                          <DialogTitle className="text-center font-bold text-xl">
+                            Contribute to the Prize Pool
+                          </DialogTitle>
+                          <DialogDescription className="text-justify">
+                            Your donation will go directly to the prize pool. Thanks for supporting
+                            the players! ❤️
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="amount" className="text-right">
+                              Amount
+                            </Label>
+                            <div className="col-span-3 relative">
+                              <Input
+                                id="amount"
+                                type="number"
+                                step="0.001"
+                                min="0.001"
+                                placeholder="0.01"
+                                value={donationAmount}
+                                onChange={(e) => setDonationAmount(e.target.value)}
+                                className="pl-2 pr-16"
+                              />
+                              <div className="absolute inset-y-0 right-2 flex items-center text-sm text-gray-500">
+                                {balance?.symbol || "ETH"}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-500 text-center">
+                            Balance:{" "}
+                            {balance
+                              ? `${Number(balance.formatted).toFixed(4)} ${balance.symbol}`
+                              : "Loading..."}
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button
+                            type="submit"
+                            onClick={handleDonation}
+                            disabled={
+                              isDonating ||
+                              !donationAmount ||
+                              Number(donationAmount) <= 0 ||
+                              isWaitingForDonate
+                            }
+                            className="bg-green-200 hover:bg-green-300 text-gray-800 cursor-pointer"
+                          >
+                            {isWaitingForDonate || isDonating ? "Processing..." : "Donate"}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 </CardContent>
               </Card>
             ) : (
