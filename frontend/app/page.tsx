@@ -123,7 +123,7 @@ export default function Home() {
         >
           Riddle – Web3 Wordle Adventure
         </h1>
-        <p className="text-base sm:text-lg md:text-xl max-w-xs sm:max-w-md animate-fade-in text-gray-700 font-medium leading-relaxed">
+        <p className="text-base sm:text-lg md:text-xl max-w-xs sm:max-w-md animate-fade-in text-gray-700 dark:text-white font-medium leading-relaxed">
           Crack the code, unlock the blockchain fun! Connect below to play.
         </p>
         <div className="mt-4 sm:mt-6">

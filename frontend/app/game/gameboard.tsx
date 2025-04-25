@@ -525,7 +525,7 @@ export default function GameBoard() {
                   </div>
                   <div className="absolute -top-2 right-0 -translate-y-full pt-2 sm:pt-3">
                     <Popover>
-                      <PopoverTrigger asChild>
+                      <PopoverTrigger asChild className="dark:bg-white">
                         <Button
                           variant="outline"
                           className="w-6 h-6 sm:w-8 sm:h-8 p-0 rounded-full text-xs sm:text-sm cursor-pointer"
