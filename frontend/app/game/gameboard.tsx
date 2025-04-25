@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -32,6 +30,12 @@ export default function GameBoard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reward, setReward] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
+  const [flippingRow, setFlippingRow] = useState<number | null>(null);
+  const [animationStates, setAnimationStates] = useState<boolean[][]>(
+    Array(6)
+      .fill(0)
+      .map(() => Array(5).fill(false))
+  );
   const inputRef = useRef<HTMLInputElement>(null);
 
   const chainId = useChainId();
@@ -61,6 +65,12 @@ export default function GameBoard() {
     setReward(0);
     setIsModalOpen(false);
     setIsSpinning(false);
+    setFlippingRow(null);
+    setAnimationStates(
+      Array(6)
+        .fill(0)
+        .map(() => Array(5).fill(false))
+    );
   };
 
   const startGame = async () => {
@@ -82,10 +92,15 @@ export default function GameBoard() {
   };
 
   const handleKeyPress = async (key: string) => {
-    if (gameOver || !gameStarted) return;
+    if (gameOver || !gameStarted || flippingRow !== null) return;
 
     const normalizedKey = key.toUpperCase();
     if (normalizedKey === "ENTER") {
+      if (currentGuess.length !== 5) {
+        toast.error("Word must be 5 letters");
+        return;
+      }
+
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/words/check`, {
           method: "POST",
@@ -99,19 +114,36 @@ export default function GameBoard() {
         const { correct, status } = await res.json();
 
         const newGuesses = [...guesses, currentGuess];
+        const rowIndex = newGuesses.length - 1;
 
         setGuesses(newGuesses);
         setGuessStatuses([...guessStatuses, status]);
         setCurrentGuess("");
 
-        if (correct) {
-          setGameWon(true);
-          setGameOver(true);
-          toast.success("You won! 🎉", { duration: 5000 });
-        } else if (newGuesses.length >= 6) {
-          setGameOver(true);
-          toast.error("Game over!", { duration: 5000 });
+        setFlippingRow(rowIndex);
+
+        for (let i = 0; i < 5; i++) {
+          setTimeout(() => {
+            setAnimationStates((prevStates) => {
+              const newStates = [...prevStates];
+              newStates[rowIndex][i] = true;
+              return newStates;
+            });
+          }, i * 200);
         }
+
+        setTimeout(() => {
+          setFlippingRow(null);
+
+          if (correct) {
+            setGameWon(true);
+            setGameOver(true);
+            toast.success("You won! 🎉", { duration: 5000 });
+          } else if (newGuesses.length >= 6) {
+            setGameOver(true);
+            toast.error("Game over!", { duration: 5000 });
+          }
+        }, 5 * 200 + 300);
       } catch (err) {
         console.error("Guess check failed:", err);
         toast.error("Error checking guess");
@@ -221,7 +253,7 @@ export default function GameBoard() {
     window.addEventListener("keydown", handleKeyDown);
 
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [gameOver, gameStarted, currentGuess, guesses, wordHash]);
+  }, [gameOver, gameStarted, currentGuess, guesses, wordHash, flippingRow]);
 
   useEffect(() => {
     if (gameStarted && inputRef.current) inputRef.current.focus();
@@ -315,26 +347,55 @@ export default function GameBoard() {
                                   ? currentGuess[colIndex]
                                   : "";
                               const letter = guessedLetter || currentLetter;
+
                               let bgColor = "bg-gray-100";
                               if (guessedLetter) {
                                 const status = getLetterStatus(rowIndex, colIndex);
-                                if (guessedLetter) {
-                                  bgColor =
-                                    status === "correct"
-                                      ? "bg-green-200"
-                                      : status === "present"
-                                      ? "bg-yellow-200"
-                                      : status === "absent"
-                                      ? "bg-gray-300"
-                                      : "bg-gray-100";
-                                }
+                                bgColor =
+                                  status === "correct"
+                                    ? "bg-green-200"
+                                    : status === "present"
+                                    ? "bg-yellow-200"
+                                    : status === "absent"
+                                    ? "bg-gray-300"
+                                    : "bg-gray-100";
                               }
+
+                              const isFlipping = animationStates[rowIndex]?.[colIndex];
+
                               return (
-                                <div
-                                  key={colIndex}
-                                  className={`${bgColor} w-full aspect-square flex items-center justify-center text-base sm:text-lg md:text-xl font-bold rounded border-2 border-gray-200 hover:scale-105 transition-transform`}
-                                >
-                                  {letter}
+                                <div key={colIndex} className="relative w-full aspect-square">
+                                  <div
+                                    className={`w-full h-full transition-transform duration-500 transform-gpu ${
+                                      isFlipping ? "rotate-y-180" : ""
+                                    }`}
+                                    style={{
+                                      transformStyle: "preserve-3d",
+                                    }}
+                                  >
+                                    <div
+                                      className={`absolute w-full h-full backface-hidden bg-gray-100 flex items-center justify-center text-base sm:text-lg md:text-xl font-bold rounded border-2 border-gray-200 ${
+                                        !isFlipping ? "" : "invisible"
+                                      }`}
+                                      style={{
+                                        backfaceVisibility: "hidden",
+                                      }}
+                                    >
+                                      {letter}
+                                    </div>
+
+                                    <div
+                                      className={`absolute w-full h-full backface-hidden ${bgColor} flex items-center justify-center text-base sm:text-lg md:text-xl font-bold rounded border-2 border-gray-200 ${
+                                        isFlipping ? "" : "invisible"
+                                      }`}
+                                      style={{
+                                        backfaceVisibility: "hidden",
+                                        transform: "rotateY(180deg)",
+                                      }}
+                                    >
+                                      {letter}
+                                    </div>
+                                  </div>
                                 </div>
                               );
                             })}
