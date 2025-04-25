@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { parseEther } from "viem";
 import {
@@ -111,69 +111,72 @@ export default function GameBoard() {
     }
   };
 
-  const handleKeyPress = async (key: string) => {
-    if (gameOver || !gameStarted || flippingRow !== null) return;
+  const handleKeyPress = useCallback(
+    async (key: string) => {
+      if (gameOver || !gameStarted || flippingRow !== null) return;
 
-    const normalizedKey = key.toUpperCase();
-    if (normalizedKey === "ENTER") {
-      if (currentGuess.length !== 5) {
-        toast.error("Word must be 5 letters");
-        return;
-      }
-
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/words/check`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user: address,
-            guess: currentGuess,
-          }),
-        });
-
-        const { correct, status } = await res.json();
-
-        const newGuesses = [...guesses, currentGuess];
-        const rowIndex = newGuesses.length - 1;
-
-        setGuesses(newGuesses);
-        setGuessStatuses([...guessStatuses, status]);
-        setCurrentGuess("");
-
-        setFlippingRow(rowIndex);
-
-        for (let i = 0; i < 5; i++) {
-          setTimeout(() => {
-            setAnimationStates((prevStates) => {
-              const newStates = [...prevStates];
-              newStates[rowIndex][i] = true;
-              return newStates;
-            });
-          }, i * 200);
+      const normalizedKey = key.toUpperCase();
+      if (normalizedKey === "ENTER") {
+        if (currentGuess.length !== 5) {
+          toast.error("Word must be 5 letters");
+          return;
         }
 
-        setTimeout(() => {
-          setFlippingRow(null);
+        try {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/words/check`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              user: address,
+              guess: currentGuess,
+            }),
+          });
 
-          if (correct) {
-            setGameWon(true);
-            setGameOver(true);
-            toast.success("You won! 🎉", { duration: 5000 });
-          } else if (newGuesses.length >= 6) {
-            setGameOver(true);
-            toast.error("Game over!", { duration: 5000 });
+          const { correct, status } = await res.json();
+
+          const newGuesses = [...guesses, currentGuess];
+          const rowIndex = newGuesses.length - 1;
+
+          setGuesses(newGuesses);
+          setGuessStatuses([...guessStatuses, status]);
+          setCurrentGuess("");
+
+          setFlippingRow(rowIndex);
+
+          for (let i = 0; i < 5; i++) {
+            setTimeout(() => {
+              setAnimationStates((prevStates) => {
+                const newStates = [...prevStates];
+                newStates[rowIndex][i] = true;
+                return newStates;
+              });
+            }, i * 200);
           }
-        }, 5 * 200 + 300);
-      } catch (err) {
-        console.error("Guess check failed:", err);
-        toast.error("Error checking guess");
+
+          setTimeout(() => {
+            setFlippingRow(null);
+
+            if (correct) {
+              setGameWon(true);
+              setGameOver(true);
+              toast.success("You won! 🎉", { duration: 5000 });
+            } else if (newGuesses.length >= 6) {
+              setGameOver(true);
+              toast.error("Game over!", { duration: 5000 });
+            }
+          }, 5 * 200 + 300);
+        } catch (err) {
+          console.error("Guess check failed:", err);
+          toast.error("Error checking guess");
+        }
+      } else if (normalizedKey === "BACKSPACE") {
+        setCurrentGuess(currentGuess.slice(0, -1));
+      } else if (currentGuess.length < 5 && /^[A-Z]$/.test(normalizedKey)) {
+        setCurrentGuess(currentGuess + normalizedKey);
       }
-    } else if (normalizedKey === "BACKSPACE") {
-      setCurrentGuess(currentGuess.slice(0, -1));
-    } else if (currentGuess.length < 5 && /^[A-Z]$/.test(normalizedKey)) {
-      setCurrentGuess(currentGuess + normalizedKey);
-    }
-  };
+    },
+    [gameOver, gameStarted, flippingRow, currentGuess, address, guesses, guessStatuses]
+  );
 
   const canPlay = () => {
     if (!lastClaimBlock || lastClaimBlock === BigInt(0) || !blockNumber) return true;
@@ -236,7 +239,7 @@ export default function GameBoard() {
       resetGameState();
       setGameStarted(false);
     }
-  }, [claimReceipt]);
+  }, [claimReceipt, refetchLastClaim, reward]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -248,7 +251,7 @@ export default function GameBoard() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [gameOver, gameStarted, currentGuess, guesses, wordHash, flippingRow]);
+  }, [gameOver, gameStarted, currentGuess, guesses, wordHash, flippingRow, handleKeyPress]);
 
   useEffect(() => {
     if (gameStarted && inputRef.current) inputRef.current.focus();
