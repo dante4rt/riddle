@@ -17,9 +17,9 @@ import { WalletAuth } from "../../components/wallet-auth";
 import { ABI } from "../constants/ABI";
 import { CONTRACT_ADDRESSES } from "../constants/config";
 import { GameState, GuessStatus } from "../constants/types";
-import { DonationModal } from "./donationModal";
-import { GameGrid } from "./gameGrid";
-import { RewardModal } from "./rewardModal";
+import { DonationModal } from "./DonationModal";
+import { GameGrid } from "./GameGrid";
+import { RewardModal } from "./RewardModal";
 
 export default function GameBoard() {
   const { isConnected, address } = useAccount();

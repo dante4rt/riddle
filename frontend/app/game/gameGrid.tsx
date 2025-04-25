@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { GameState } from "../constants/types";
-import Keyboard from "./keyboard";
+import Keyboard from "./Keyboard";
 
 interface GameGridProps {
   gameState: GameState;

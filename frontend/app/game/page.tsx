@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAccount } from "wagmi";
-import GameBoard from "./gameBoard";
+import GameBoard from "./GameBoard";
 
 export default function GamePage() {
   const { address } = useAccount();
