@@ -4,6 +4,6 @@ export const CONTRACT_ADDRESSES = {
 };
 
 export const RPC_URLs = {
-    11155111: "https://1rpc.io/sepolia",
+    11155111: "https://api.zan.top/public/eth-sepolia",
     84532: "https://sepolia.base.org",
 }
