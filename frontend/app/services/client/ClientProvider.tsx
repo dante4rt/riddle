@@ -5,7 +5,7 @@ import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { WagmiProvider } from "wagmi";
-import { config } from "./services/wagmi/config";
+import { config } from "../wagmi/config";
 
 interface Particle {
   x: number;
