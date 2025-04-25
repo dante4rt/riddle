@@ -5,18 +5,28 @@ import { walletClient } from "../utils/web3";
 
 const ABI = parseAbi(["function markAsWinner(address user) external"]);
 
+const CHAIN_MAP = {
+  11155111: sepolia,
+  4202: liskSepolia,
+  10143: monadTestnet,
+  84532: baseSepolia,
+};
+
 export async function markWinner(user: string, chainId: number) {
-  const CONTRACT_ADDRESS =
-    chainId in CONTRACT_ADDRESSES
-      ? CONTRACT_ADDRESSES[chainId as keyof typeof CONTRACT_ADDRESSES]
-      : undefined;
+  const contractAddress = CONTRACT_ADDRESSES[chainId as keyof typeof CONTRACT_ADDRESSES];
+
+  if (!contractAddress) {
+    throw new Error(`No contract address found for chain ID ${chainId}`);
+  }
+
+  const chain = CHAIN_MAP[chainId as keyof typeof CHAIN_MAP];
 
   const tx = await walletClient(chainId).writeContract({
-    address: CONTRACT_ADDRESS as `0x${string}`,
+    address: contractAddress as `0x${string}`,
     abi: ABI,
     functionName: "markAsWinner",
     args: [user as `0x${string}`],
-    chain: chainId === 11155111 ? sepolia : chainId === 4202 ? liskSepolia : chainId === 10143 ? monadTestnet : baseSepolia,
+    chain,
   });
 
   return tx;
