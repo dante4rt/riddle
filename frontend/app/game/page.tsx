@@ -11,6 +11,7 @@ export default function GamePage() {
 
   useEffect(() => {
     const savedVerification = localStorage.getItem("walletAuth");
+
     if (!savedVerification) {
       router.push("/");
       return;
