@@ -1,5 +1,5 @@
 import { parseAbi } from "viem";
-import { baseSepolia, liskSepolia, monadTestnet, sepolia } from "viem/chains";
+import { baseSepolia, liskSepolia, megaethTestnet, monadTestnet, sepolia } from "viem/chains";
 import { CONTRACT_ADDRESSES } from "../constants/config";
 import { walletClient } from "../utils/web3";
 
@@ -10,6 +10,7 @@ const CHAIN_MAP = {
   4202: liskSepolia,
   10143: monadTestnet,
   84532: baseSepolia,
+  6342: megaethTestnet
 };
 
 export async function markWinner(user: string, chainId: number) {
