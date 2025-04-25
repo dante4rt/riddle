@@ -1,5 +1,5 @@
 import { parseAbi } from "viem";
-import { baseSepolia, sepolia } from "viem/chains";
+import { baseSepolia, liskSepolia, sepolia } from "viem/chains";
 import { CONTRACT_ADDRESSES } from "../constants/config";
 import { walletClient } from "../utils/web3";
 
@@ -16,7 +16,7 @@ export async function markWinner(user: string, chainId: number) {
     abi: ABI,
     functionName: "markAsWinner",
     args: [user as `0x${string}`],
-    chain: chainId === 11155111 ? sepolia : baseSepolia,
+    chain: chainId === 11155111 ? sepolia : chainId === 4202 ? liskSepolia : baseSepolia,
   });
 
   return tx;
