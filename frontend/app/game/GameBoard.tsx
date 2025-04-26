@@ -39,7 +39,7 @@ export default function GameBoard() {
   const [flippingRow, setFlippingRow] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const chainId = useChainId();
-  const rewards = Array.from({ length: 10 }, (_, i) => 0.005 + i * 0.0005);
+  const rewards = Array.from({ length: 10 }, (_, i) => 0.05 + i * 0.005);
   const router = useRouter();
 
   const [animationStates, setAnimationStates] = useState<boolean[][]>(
