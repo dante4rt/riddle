@@ -1,4 +1,5 @@
 import express from "express";
+import { Leaderboard } from "../models/Leaderboard";
 import { WinnerLog } from "../models/WinnerLog";
 import { markWinner } from "../services/riddleRewards";
 
@@ -14,6 +15,15 @@ router.post("/", async (req, res) => {
 
     if (txHash) {
       await WinnerLog.create({ user, txHash });
+
+      const existing = await Leaderboard.findOne({ user });
+
+      if (existing) {
+        existing.totalWins += 1;
+        await existing.save();
+      } else {
+        await Leaderboard.create({ user });
+      }
 
       res.json({ success: true, txHash });
     }

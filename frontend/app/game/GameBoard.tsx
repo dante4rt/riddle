@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { parseEther } from "viem";
@@ -39,6 +40,7 @@ export default function GameBoard() {
   const inputRef = useRef<HTMLInputElement>(null);
   const chainId = useChainId();
   const rewards = Array.from({ length: 10 }, (_, i) => 0.005 + i * 0.0005);
+  const router = useRouter();
 
   const [animationStates, setAnimationStates] = useState<boolean[][]>(
     Array(6)
@@ -355,6 +357,12 @@ export default function GameBoard() {
                       </Button>
                     </div>
                   )}
+                  <Button
+                    onClick={() => router.push("/leaderboard")}
+                    className="w-full bg-orange-100 hover:bg-orange-200 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                  >
+                    Leaderboard
+                  </Button>
                   <DonationModal
                     isOpen={isDonationModalOpen}
                     setIsOpen={setIsDonationModalOpen}

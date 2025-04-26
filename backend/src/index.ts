@@ -9,6 +9,7 @@ import mongoose from "mongoose";
 
 import authRoute from "./routes/auth";
 import claimRoute from "./routes/claim";
+import leaderboardRoute from "./routes/leaderboard";
 import winnerRoute from "./routes/winner";
 import wordsRoute from "./routes/words";
 
@@ -30,6 +31,7 @@ app.use("/auth", authRoute);
 app.use("/claim-check", claimRoute);
 app.use("/winner", winnerRoute);
 app.use("/words", wordsRoute);
+app.use("/leaderboard", leaderboardRoute);
 
 app.get("/", (req, res) => {
   res.status(200).json({
