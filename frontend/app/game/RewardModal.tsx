@@ -125,7 +125,7 @@ export function RewardModal({
               </div>
             ) : (
               <Button
-                className={`mt-6 font-bold px-8 py-6 rounded-xl text-lg shadow-lg transform transition-all duration-200 ${
+                className={`cursor-pointer mt-6 font-bold px-8 py-6 rounded-xl text-lg shadow-lg transform transition-all duration-200 ${
                   isSpinning
                     ? "bg-gray-400 text-white cursor-not-allowed"
                     : "bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:scale-105 hover:shadow-xl"
