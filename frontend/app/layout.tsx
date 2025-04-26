@@ -6,14 +6,27 @@ import { ClientProviders } from "./services/client/ClientProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Riddle",
-  description: "Rama's Interactive Wordle: A Wordle-like game with Web3 integration",
-  keywords: ["Wordle", "Web3 Game", "Riddle", "Crypto Game", "Interactive"],
+  title: "Riddle | Play Web3 Wordle and Win Crypto Rewards",
+  description:
+    "Riddle is a decentralized Wordle-inspired GameFi dApp. Solve riddles, win crypto prizes, and join Rama's Web3 gaming revolution. Play now!",
+  keywords: [
+    "Wordle Game",
+    "Web3 Gaming",
+    "Crypto Game",
+    "Blockchain Game",
+    "Play to Earn",
+    "Riddle Game",
+    "Web3 Wordle",
+    "Crypto Rewards",
+    "GameFi dApp",
+    "Rama Interactive",
+  ],
   authors: [{ name: "Rama" }],
   creator: "Rama",
   openGraph: {
-    title: "Riddle",
-    description: "Play and earn with Rama's Web3 Riddle game!",
+    title: "Riddle | Solve, Play, and Earn Crypto Rewards",
+    description:
+      "Experience the first Web3 Wordle game! Solve daily riddles, compete for crypto prizes, and join Rama's blockchain gaming adventure.",
     url: "https://riddle-rouge.vercel.app/",
     siteName: "Riddle by Rama",
     images: [
@@ -21,7 +34,7 @@ export const metadata: Metadata = {
         url: "/images/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Riddle - Web3 Game",
+        alt: "Riddle - Web3 Wordle Crypto Game",
       },
     ],
     locale: "en_US",
@@ -29,8 +42,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Riddle",
-    description: "Play Rama’s Web3 Wordle game and earn rewards",
+    title: "Play Riddle – Solve Words, Win Crypto!",
+    description:
+      "Riddle brings Web3 to Wordle. Guess the correct word, claim rewards, and join the GameFi revolution with Rama!",
     creator: "@dntyk",
     images: ["/images/og-image.png"],
   },
