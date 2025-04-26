@@ -2,7 +2,7 @@
 
 A **Web3-powered Wordle-style game** where players solve riddles, flip cards, and claim crypto rewards. Built with a cutting-edge stack spanning smart contracts, backend APIs, and a dynamic, interactive frontend.
 
-Now enhanced with **card flip animations**, **donation support**, and an upcoming **leaderboard system**.
+Now enhanced with **card flip animations**, **donation support**, and a live **global leaderboard system**.
 
 ---
 
@@ -19,21 +19,34 @@ riddle/
 
 ## ⚙️ Tech Stack
 
-### Frontend
+### Frontend (Next.js App)
 
-- **Next.js** – Fast, scalable React framework with SSR support.
-- **TypeScript** – Strong typing for safer, more maintainable code.
-- **Wagmi** – Ethereum-focused React hooks for seamless smart contract interaction.
-- **RainbowKit** – Beautiful wallet connection UI, ready out-of-the-box.
-- **Tailwind CSS** – Utility-first CSS for responsive and flexible design.
-- **Sonner** – Toast notifications with a modern touch.
+- **Next.js 15 (Turbopack)** – Blazing-fast React framework.
+- **TypeScript** – Strong typing for safer, scalable code.
+- **Tailwind CSS 4** – Utility-first CSS for modern, responsive design.
+- **Wagmi v2** – React hooks for Ethereum smart contract interaction.
+- **RainbowKit** – Elegant wallet connection UI.
+- **Viem** – Lightweight and fast EVM interactions library.
+- **Sonner** – Modern toast notifications.
+- **Radix UI** – Accessible, headless UI primitives (dialogs, tooltips, popovers).
+- **Lucide React** – Icon set for consistent UI.
+- **Next Themes** – Simple dark/light theme switching.
+- **Class Variance Authority / clsx** – Clean dynamic className management.
+- **tw-animate-css** – Easy animations integration with Tailwind.
 
-### Backend
+### Backend (Express API)
 
 - **Express.js** – Lightweight Node.js server framework.
-- **MongoDB** – NoSQL database for managing player progress and cooldowns.
-- **Mongoose** – Elegant data modeling for MongoDB.
-- **TypeScript** – Static typing for robust server-side code.
+- **TypeScript** – Strong typing on the server.
+- **MongoDB** – NoSQL database for players, cooldowns, and leaderboard storage.
+- **Mongoose** – ODM for MongoDB, schema modeling.
+- **JWT (jsonwebtoken)** – Secure authentication via JSON Web Tokens.
+- **bcrypt** – Password hashing for admin authentication.
+- **Helmet** – HTTP header security.
+- **Compression** – Gzip compression for faster responses.
+- **CORS** – Cross-origin resource sharing setup.
+- **Viem** – EVM interaction from the backend when needed.
+- **Axios** – HTTP client for internal calls.
 
 ### Smart Contracts
 
@@ -48,24 +61,42 @@ riddle/
 - ✅ **Wallet Verification & Cooldown System** – Fair play enforced server-side.
 - ✅ **Card Flip Animation** – Engaging flip transition when submitting answers.
 - ✅ **Donation Support** – Players can contribute directly to the prize pool.
-- ✅ **Dynamic Background Animation** – Light, interactive background effects.
-- ✅ **OpenGraph & SEO Ready** – Social previews and meta optimized.
+- ✅ **Global Leaderboard System** – Track and compete with top players worldwide.
+- ✅ **Dynamic Background Animation** – Light, interactive particle effects.
+- ✅ **OpenGraph & SEO Ready** – Social previews and metadata optimized.
 - ✅ **Mobile Responsive** – Fully optimized for phones, tablets, and desktops.
-- 🚧 **Coming Soon**: **Global Leaderboard System** – Compete with players worldwide.
 
 ---
 
 ## 🛠 Setup Instructions
 
-Each subproject (`frontend`, `backend`, `contract`) contains its own `README.md` for setup instructions. Pick your starting point:
+Each subproject (`frontend`, `backend`, `contract`) contains its own `README.md` for setup instructions.
+
+Basic setup flow:
 
 ```bash
-cd frontend   # or backend / contract
+# Clone the repo
+git clone https://github.com/dante4rt/riddle.git
+cd riddle
+
+# Setup frontend
+cd frontend
 npm install
-npm run dev   # or your environment command
+npm run dev
+
+# Setup backend
+cd ../backend
+npm install
+npm run dev
+
+# Setup smart contract (optional for devs)
+cd ../contract
+forge install
+forge build
 ```
 
-Make sure your local blockchain, backend API, and frontend are properly linked via `.env` configs.
+- Configure your `.env` files properly (for backend API, frontend API URLs, smart contract addresses).
+- Ensure MongoDB and local blockchain (if testing) are running.
 
 ---
 
@@ -73,14 +104,15 @@ Make sure your local blockchain, backend API, and frontend are properly linked v
 
 Riddle is built for more than just fun — it’s a playground to:
 
-- Gamify learning about Web3.
-- Create fair, transparent reward systems.
-- Empower players through crypto-native interactions.
+- Gamify learning about Web3 concepts.
+- Create fair, transparent crypto reward systems.
+- Empower players through decentralized, blockchain-native gameplay.
+- Experiment with social, competitive, and collaborative gaming models.
 
-This project is designed to evolve with more social and competitive features.
+This project is designed to evolve into a fully gamified, social Web3 mini-platform.
+
+---
 
 ## 📜 License
 
 MIT License © [Rama (dante4rt)](https://github.com/dante4rt)
-
-## ✨ Ready to flip, solve, and earn
