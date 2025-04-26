@@ -84,7 +84,7 @@ export function WalletAuth() {
 
       hasSignedRef.current = true;
     }
-  }, [connections, signPending, signature, signMessage, message, verificationState]);
+  }, [connections, signPending, signature, signMessage, message, verificationState, address]);
 
   useEffect(() => {
     triggerSigning();
