@@ -12,16 +12,19 @@ interface Player {
 
 export default function LeaderboardPage() {
   const [players, setPlayers] = useState<Player[]>([]);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/leaderboard`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/leaderboard`);
         const data = await res.json();
         setPlayers(data.data.slice(0, 10));
       } catch (error) {
         console.error(error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -31,40 +34,55 @@ export default function LeaderboardPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 md:p-24 relative overflow-hidden">
       <Card className="z-10 w-full max-w-md bg-white border border-gray-300 shadow-xl rounded-3xl p-6 sm:p-10">
-        <CardContent className="flex flex-col items-center">
-          <h1
-            id="leaderboard-title"
-            className="text-lg sm:text-xl md:text-2xl font-medium mb-8 text-gray-800 text-center"
-          >
-            🏆 Top Riddlers
+        <CardContent className="flex flex-col items-center w-full px-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-2">
+            🏆 Riddle Leaderboard
           </h1>
+          <p className="text-sm sm:text-base text-gray-600 text-center mb-6">
+            Congrats to the top players! Solve riddles, earn your spot, and claim your glory.
+          </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full">
-            {players.length > 0 ? (
+          <div className="flex flex-col w-full gap-3 overflow-y-auto max-h-64 pr-2">
+            {loading ? (
+              <div className="flex justify-center items-center h-40">
+                <div className="w-8 h-8 border-4 border-pink-300 border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : players.length > 0 ? (
               players.map((player, index) => (
-                <Card
+                <div
                   key={player.user}
-                  className="bg-white border border-gray-200 shadow-md hover:scale-[1.03] transition-transform rounded-2xl text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
+                  className={`flex items-center justify-between w-full bg-white border ${
+                    index === 0
+                      ? "border-yellow-400"
+                      : index === 1
+                      ? "border-gray-400"
+                      : index === 2
+                      ? "border-orange-400"
+                      : "border-gray-200"
+                  } shadow-sm rounded-xl px-4 py-3 ${
+                    index === 0
+                      ? "text-yellow-600 font-bold text-lg"
+                      : index === 1
+                      ? "text-gray-600 font-semibold text-base"
+                      : index === 2
+                      ? "text-orange-500 font-semibold text-base"
+                      : "text-gray-700 font-medium text-sm"
+                  }`}
                 >
-                  <CardContent className="p-6 flex flex-col items-center text-center">
-                    <div className="text-2xl font-bold text-pink-500 dark:text-pink-400 flex items-center gap-2 mb-2">
-                      #{index + 1} {index === 0 && "👑"}
-                      {index === 1 && "🥈"}
-                      {index === 2 && "🥉"}
-                    </div>
-                    <div className="text-base font-semibold break-words">
+                  <div className="flex items-center gap-2">
+                    <span>#{index + 1}</span>
+                    {index === 0 && "👑"}
+                    {index === 1 && "🥈"}
+                    {index === 2 && "🥉"}
+                    <span className="ml-2">
                       {player.user.slice(0, 6)}...{player.user.slice(-4)}
-                    </div>
-                    <div className="mt-1 text-sm text-purple-500 dark:text-purple-300">
-                      {player.totalWins} Wins
-                    </div>
-                  </CardContent>
-                </Card>
+                    </span>
+                  </div>
+                  <div className="text-right">{player.totalWins} Wins</div>
+                </div>
               ))
             ) : (
-              <p className="text-gray-600 dark:text-gray-400 text-center col-span-full">
-                No players yet...
-              </p>
+              <p className="text-center text-gray-500 w-full">No players yet...</p>
             )}
           </div>
 
