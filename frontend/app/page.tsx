@@ -119,7 +119,7 @@ export default function Home() {
       <div className="z-10 max-w-5xl w-full flex flex-col items-center text-center">
         <h1
           id="welcome-title"
-          className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 sm:mb-6 drop-shadow-[0_3px_6px_rgba(0,0,0,0.2)] bg-gradient-to-r from-[#cfaeff] via-[#a8d5ff] to-[#ffcbc1] bg-clip-text text-transparent"
+          className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 sm:mb-6 drop-shadow-[0_3px_6px_rgba(0,0,0,0.2)] bg-gradient-to-r from-purple-600 via-blue-600 to-orange-600 dark:from-[#cfaeff] dark:via-[#a8d5ff] dark:to-[#ffcbc1] bg-clip-text text-transparent"
         >
           Riddle – Web3 Wordle Adventure
         </h1>
