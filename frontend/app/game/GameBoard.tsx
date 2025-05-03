@@ -364,8 +364,6 @@ export default function GameBoard() {
                     Leaderboard
                   </Button>
                   <DonationModal
-                    isOpen={isDonationModalOpen}
-                    setIsOpen={setIsDonationModalOpen}
                     donationAmount={donationAmount}
                     setDonationAmount={setDonationAmount}
                     balance={balance}
