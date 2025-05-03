@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -88,12 +87,14 @@ export default function LeaderboardPage() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-8 w-full max-w-[16rem] sm:max-w-[20rem] md:max-w-[24rem] flex-wrap">
-              <Button
+              <button
                 onClick={() => router.push("/game")}
-                className="w-full bg-pink-200 hover:bg-pink-300 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                className="btn w-full bg-pink-400 hover:bg-pink-500 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
               >
+                <span className="animation absolute left-4"></span>
                 Back
-              </Button>
+                <span className="animation absolute right-4"></span>
+              </button>
             </div>
           </CardContent>
         </Card>

@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "motion/react";
 import React, { ReactNode, createContext, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Button } from "./ui/button";
 
 interface ModalContextType {
   open: boolean;
@@ -39,15 +38,11 @@ export const ModalTrigger = ({
 }) => {
   const { setOpen } = useModal();
   return (
-    <Button
-      className={cn(
-        "w-full bg-blue-100 hover:bg-blue-200 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer",
-        className
-      )}
-      onClick={() => setOpen(true)}
-    >
+    <button className={cn("w-full", className)} onClick={() => setOpen(true)}>
+      <span className="animation absolute left-4"></span>
       {children}
-    </Button>
+      <span className="animation absolute right-4"></span>
+    </button>
   );
 };
 

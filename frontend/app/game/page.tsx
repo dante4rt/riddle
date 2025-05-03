@@ -24,7 +24,7 @@ export default function GamePage() {
   }, [address, router]);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 py-24 md:px-24">
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 py-24 md:px-24 h-dvh overflow-x-hidden">
       <GameBoard />
     </main>
   );

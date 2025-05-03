@@ -304,9 +304,14 @@ export default function GameBoard() {
       />
 
       {!gameStarted && (
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-center text-purple-400 mb-4 sm:mb-6 md:mb-8 drop-shadow-lg tracking-wide">
-          Ready to Riddle? Your Web3 Wordle Awaits!
-        </h1>
+        <div className="text-center mt-20 mb-6 sm:mb-8 md:mb-10">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-purple-500 drop-shadow-md tracking-tight leading-snug">
+            Ready to Riddle?
+          </h1>
+          <p className="mt-2 text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 font-medium">
+            Dive into the blockchain twist on Wordle — can you crack the 5-letter code?
+          </p>
+        </div>
       )}
 
       <div className="flex flex-col items-center w-full max-w-md space-y-4 sm:space-y-6">
@@ -341,12 +346,14 @@ export default function GameBoard() {
                     </ul>
                   </div>
                   {canPlay() ? (
-                    <Button
+                    <button
                       onClick={startGame}
-                      className="w-full bg-green-200 hover:bg-green-300 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                      className="btn w-full bg-green-600 hover:bg-green-700"
                     >
-                      Start Game
-                    </Button>
+                      <span className="animation absolute left-4"></span>
+                      <span>Start Game</span>
+                      <span className="animation absolute right-4"></span>
+                    </button>
                   ) : (
                     <div className="text-center">
                       <Button
@@ -357,12 +364,15 @@ export default function GameBoard() {
                       </Button>
                     </div>
                   )}
-                  <Button
+                  <button
                     onClick={() => router.push("/leaderboard")}
-                    className="w-full bg-orange-100 hover:bg-orange-200 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                    className="btn w-full"
+                    style={{ background: "#F6AE2D" }}
                   >
-                    Leaderboard
-                  </Button>
+                    <span className="animation absolute left-4"></span>
+                    <span>Leaderboard</span>
+                    <span className="animation absolute right-4"></span>
+                  </button>
                   <DonationModal
                     donationAmount={donationAmount}
                     setDonationAmount={setDonationAmount}
@@ -404,39 +414,50 @@ export default function GameBoard() {
                 />
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-4 w-full max-w-[16rem] sm:max-w-[20rem] md:max-w-[24rem] flex-wrap">
                   {gameWon && (
-                    <Button
-                      className="w-full bg-yellow-200 hover:bg-yellow-300 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                    <button
+                      className="btn w-full"
+                      style={{ background: "#F9C846" }}
                       onClick={() => setIsModalOpen(true)}
                       disabled={isClaiming || isWaitingForClaim || !canPlay()}
                     >
-                      {isClaiming || isWaitingForClaim
-                        ? "Loading..."
-                        : !canPlay()
-                        ? "Claimed"
-                        : "Claim Reward"}
-                    </Button>
+                      <span>
+                        {isClaiming || isWaitingForClaim
+                          ? "Loading..."
+                          : !canPlay()
+                          ? "Claimed"
+                          : "Claim Reward"}
+                      </span>
+                      {!(isClaiming || isWaitingForClaim || !canPlay()) && (
+                        <span className="animation absolute right-4"></span>
+                      )}
+                    </button>
                   )}
                   {gameOver && (
-                    <Button
+                    <button
                       onClick={async () => {
                         resetGameState();
                         await startGame();
                       }}
-                      className="w-full bg-purple-200 hover:bg-purple-300 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                      className="btn w-full"
+                      style={{ background: "#9381FF" }}
                       disabled={!canPlay()}
                     >
-                      {canPlay() ? "Play Again" : `Play Again in ${getCooldownTime()}`}
-                    </Button>
+                      <span>{canPlay() ? "Play Again" : `Play Again in ${getCooldownTime()}`}</span>
+                      {canPlay() && <span className="animation absolute right-4"></span>}
+                    </button>
                   )}
-                  <Button
+                  <button
                     onClick={() => {
                       resetGameState();
                       setGameStarted(false);
                     }}
-                    className="w-full bg-blue-200 hover:bg-blue-300 text-gray-800 font-bold py-2 px-4 sm:px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                    className="btn w-full"
+                    style={{ background: "#4361EE" }}
                   >
-                    Back
-                  </Button>
+                    <span className="animation absolute left-4"></span>
+                    <span>Back</span>
+                    <span className="animation absolute right-4"></span>
+                  </button>
                 </div>
               </>
             )}
