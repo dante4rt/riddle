@@ -40,18 +40,18 @@ export function DonationModal({
               src="dance.lottie"
               loop
               autoplay
-              className="w-full h-full object-contain cursor-pointer"
+              className="w-24 h-24 object-contain cursor-pointer"
             />
           </div>
-
-          <h2 className="text-center font-bold text-xl">Contribute to the Prize Pool</h2>
-          <p className="text-justify text-sm mt-2">
+          <h2 className="text-center font-bold text-xl text-gray-900 dark:text-white">
+            Contribute to the Prize Pool
+          </h2>
+          <p className="text-justify text-sm mt-2 text-gray-600 dark:text-gray-300">
             Your donation will go directly to the prize pool. Thanks for supporting the players! ❤️
           </p>
-
           <div className="grid gap-4 py-6">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="amount" className="text-right">
+              <Label htmlFor="amount" className="text-right text-gray-700 dark:text-gray-200">
                 Amount
               </Label>
               <div className="col-span-3 relative">
@@ -63,28 +63,27 @@ export function DonationModal({
                   placeholder="0.01"
                   value={donationAmount}
                   onChange={(e) => setDonationAmount(e.target.value)}
-                  className="pl-2 pr-16"
+                  className="pl-2 pr-16 text-gray-900 dark:text-white bg-white dark:bg-neutral-800 border-gray-300 dark:border-neutral-600"
                 />
-                <div className="absolute inset-y-0 right-2 flex items-center text-sm text-gray-500">
+                <div className="absolute inset-y-0 right-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
                   {balance?.symbol || "ETH"}
                 </div>
               </div>
             </div>
-            <div className="text-xs text-gray-500 text-center">
+            <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
               Balance:{" "}
               {balance ? `${Number(balance.formatted).toFixed(4)} ${balance.symbol}` : "Loading..."}
             </div>
           </div>
         </ModalContent>
-
-        <ModalFooter>
+        <ModalFooter className="bg-gray-100 dark:bg-neutral-900">
           <Button
             type="submit"
             onClick={handleDonation}
             disabled={
               isDonating || !donationAmount || Number(donationAmount) <= 0 || isWaitingForDonate
             }
-            className="bg-green-200 hover:bg-green-300 text-gray-800 cursor-pointer"
+            className="bg-green-200 hover:bg-green-300 dark:bg-green-800 dark:hover:bg-green-700 text-gray-800 dark:text-gray-100 cursor-pointer"
           >
             {isWaitingForDonate || isDonating ? "Processing..." : "Donate"}
           </Button>
