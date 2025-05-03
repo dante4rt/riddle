@@ -1,6 +1,5 @@
 "use client";
 
-import { Toaster } from "@/components/ui/sonner";
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
@@ -110,7 +109,6 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
                 Rama.
               </a>
             </footer>
-            <Toaster richColors position="top-right" />
           </div>
         </RainbowKitProvider>
       </QueryClientProvider>
