@@ -313,7 +313,7 @@ export default function GameBoard() {
         {isConnected ? (
           <>
             {!gameStarted ? (
-              <Card className="w-full bg-purple-50 shadow-md">
+              <Card className="w-full bg-purple-50 shadow-md border-none">
                 <CardHeader>
                   <CardTitle className="text-lg sm:text-xl md:text-2xl text-gray-700 font-medium text-center">
                     Web3 Wordle – Blockchain Edition

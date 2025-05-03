@@ -70,7 +70,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} bg-white dark:bg-black`}>
-        <ClientProviders>{children}</ClientProviders>
+        <div className="background-container">
+          <ClientProviders>{children}</ClientProviders>
+        </div>
       </body>
     </html>
   );

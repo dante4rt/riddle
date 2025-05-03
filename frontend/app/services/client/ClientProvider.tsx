@@ -99,7 +99,7 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
           <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />
           <div className="relative z-10">
             {children}
-            <footer className="sticky bottom-0 z-20 bg-white dark:bg-black bg-opacity-90 text-gray-700 dark:text-white text-center py-2 sm:py-3 text-xs sm:text-sm">
+            <footer className="sticky bottom-0 z-20 bg-transparent dark:bg-black bg-opacity-90 text-gray-700 dark:text-white text-center py-2 sm:py-3 text-xs sm:text-sm">
               © {currentYear} with ❤️ by{" "}
               <a
                 href="https://ramadhvni.com/"
