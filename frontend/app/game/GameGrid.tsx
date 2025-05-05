@@ -33,7 +33,7 @@ export function GameGrid({ gameState }: GameGridProps) {
                         : "";
                     const letter = guessedLetter || currentLetter;
 
-                    let bgColor = "bg-gray-100";
+                    let bgColor = "bg-white";
                     if (guessedLetter) {
                       const status = getLetterStatus(rowIndex, colIndex);
                       bgColor =
@@ -43,7 +43,7 @@ export function GameGrid({ gameState }: GameGridProps) {
                           ? "bg-yellow-200"
                           : status === "absent"
                           ? "bg-gray-300"
-                          : "bg-gray-100";
+                          : "bg-white";
                     }
 
                     const isFlipping = animationStates[rowIndex]?.[colIndex];
@@ -57,7 +57,7 @@ export function GameGrid({ gameState }: GameGridProps) {
                           style={{ transformStyle: "preserve-3d" }}
                         >
                           <div
-                            className={`absolute w-full h-full backface-hidden bg-gray-100 flex items-center justify-center text-base sm:text-lg md:text-xl font-bold rounded border-2 border-gray-200 ${
+                            className={`absolute w-full h-full backface-hidden bg-white flex items-center justify-center text-base sm:text-lg md:text-xl font-bold rounded border-2 border-gray-200 ${
                               !isFlipping ? "" : "invisible"
                             }`}
                             style={{ backfaceVisibility: "hidden" }}

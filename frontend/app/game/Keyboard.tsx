@@ -37,7 +37,7 @@ export default function Keyboard({ onKeyPress, guesses, targetWord }: KeyboardPr
     if (correct) return "bg-green-200";
     if (present) return "bg-yellow-200";
     if (absent) return "bg-gray-300";
-    return "bg-gray-100 hover:bg-gray-200";
+    return "bg-gray-50 hover:bg-gray-100";
   };
 
   return (
